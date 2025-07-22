@@ -1,3 +1,14 @@
+rm(list = ls())
+library(tidyverse)
+library(patchwork)
+
+water_quality <- read.csv("./Shared Data/Rivers/ArcticGRO Water Quality Data.csv")[-c(1:7),]   # get water quality data and clean
+names(water_quality) <- water_quality[1,]
+water_quality_ready <- water_quality[-c(1,2),]
+names(water_quality_ready) <- make.unique(names(water_quality_ready))
+water_quality_ready <- water_quality_ready %>%
+  filter(Date != "")
+
 foo <- subset(water_quality_ready,select = c(NO3,Date,Discharge)) %>% 
   mutate(Date = as.Date(Date),
          Month = month(Date),
@@ -50,7 +61,6 @@ saveRDS(no3_monthly,"./Objects/NO3 River Concentrations.RDS")
 saveRDS(NH4_monthly,"./Objects/NH4 River Concentrations.RDS")
 
 
-library(patchwork)
 p1 <- ggplot() +
   geom_line(data = no3_monthly,aes(x = Month,y = monthly_no3),color = "darkgreen",linewidth = 1.5) +
   geom_point(data = no3_monthly,aes(x = Month,y = monthly_no3),color = "darkgreen",size = 3) +
