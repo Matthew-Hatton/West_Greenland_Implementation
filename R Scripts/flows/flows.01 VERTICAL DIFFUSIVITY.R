@@ -1,6 +1,6 @@
 
 # Summarise the data extracted from NEMO-MEDUSA, dealing with deep convection issues
-# readRDS("./Objects/vertical boundary/.")  # Marker so network script can see where the data is being pulled from
+# readRDS("./Objects/vertical boundary/.")  # Marker so network script can see where the data is being pulled from.
 
 #### Setup ####
 
