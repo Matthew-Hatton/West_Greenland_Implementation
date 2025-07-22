@@ -1,6 +1,6 @@
 rm(list = ls()) #reset
 library(tidyverse)
-#justification for these classifications are in the implementation document
+#justification for these classifications are in the implementation document.
 
 
 domain <- readRDS("./Objects/Domains.rds")
