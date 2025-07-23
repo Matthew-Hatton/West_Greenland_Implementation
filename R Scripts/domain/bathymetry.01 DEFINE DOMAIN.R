@@ -166,6 +166,6 @@ ggplot() +
 # Domains elevation goes amiss, we can manually add back in
 Domains$Elevation[2] <- -266.0670
 setwd("~/PhD/24-25/NEMO-ERSEM") # Reset to project directory
-saveRDS(Domains, "Objects/Domains.rds") #saves out domain FINISHED
+saveRDS(Domains, "./Objects/domain/domainWG.rds") #saves out domain FINISHED
 
 #plot(GEBCO)
