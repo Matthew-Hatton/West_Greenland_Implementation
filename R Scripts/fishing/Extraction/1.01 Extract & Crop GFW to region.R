@@ -11,7 +11,18 @@ sf_use_s2(FALSE) #turn off spherical geometry
 handlers(global = T)
 progressr::handlers("cli") # progress bars are nice
 
+model <- "BarentsSea"
+
 source("I:/Science/MS/users/students/Hatton_Matthew/Documents/PhD/22-23/West Greenland/NEMO/Data Wrangling/Jacks Way/fishing/Global Fishing Watch/R Scripts/Functions/RoughCrop.R") #loads crop function
+if (model == "WestGreenland") {
+  message("Loaded West Greenland model")
+  source("./Objects/regionFileWG.R")
+} else if(model == "BarentsSea"){
+  message("Loaded Barents Sea model")
+  source("./Objects/regionFileBS.R")
+} else{
+  message("Please enter valid model.\nOptions:\nWestGreenland\nBarentsSea")
+}
 
 #specify year - 2012 is GFW min
 year <- seq(2012,2019)
@@ -23,8 +34,8 @@ for (i in year){
   all_files <- future_map(files,read.csv,
                           .progress = F) #read in all files from that year
   
-  all_files <- lapply(all_files,crop,maxlat = 72.5,minlat = 59,maxlon = -45,minlon = -61) #crops down those files
+  all_files <- lapply(all_files,crop,maxlat = maxlat,minlat = minlat,maxlon = maxlon,minlon = minlon) #crops down those files to rough study domain
   
   all_data <- do.call(rbind.data.frame,all_files) #merges to one dataframe
-  write.csv(all_data,paste0("./Objects/fishing/GlobalFishingWatch/WestGreenland//GFW_",i,".csv"),row.names = FALSE)
+  write.csv(all_data,paste0("./Objects/fishing/GlobalFishingWatch/",model,"/GFW_",i,".csv"),row.names = FALSE)
 }
