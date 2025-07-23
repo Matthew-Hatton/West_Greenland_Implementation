@@ -1,4 +1,7 @@
 *.Rproj.user
 *.Rproj
 *.gitignore
-.Rproj.user
+*.Rproj.user
+*.RData
+*.Rhistory
+*Objects
