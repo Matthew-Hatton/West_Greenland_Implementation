@@ -23,4 +23,4 @@ for (year in years) {
   rm(new_data)
 }
 
-write.csv(all_data,"./Objects/fishing/Distribution/Sediment Distribution.csv")
+write.csv(all_data,"./Objects/fishing/Distribution/Processed/Sediment Distribution.csv")

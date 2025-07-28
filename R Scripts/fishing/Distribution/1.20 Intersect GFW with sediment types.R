@@ -67,7 +67,7 @@ intersection <- function(years){
     
     # Save the export CSV
     write.csv(fishing_sediment_export, 
-              paste0("./Objects/physical/", year, "_GFW_sediment_intersection.csv"), 
+              paste0("./Objects/physical/Unprocessed/", year, "_GFW_sediment_intersection.csv"), 
               row.names = FALSE)
     # Update progress bar
     p()
