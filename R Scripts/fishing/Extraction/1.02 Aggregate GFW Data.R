@@ -1,26 +1,31 @@
 ## Script to aggregate previously extracted GFW data into Inshore/Offshore.
-## CODE NEEDS CLEANING ## 
 
 rm(list=ls()) #reset
 library(tidyverse)
 library(furrr)
 library(sf)
 library(dplyr)
-plan(multisession)
+plan(multisession,workers = availableCores()-1)
 sf_use_s2(FALSE) #turn off spherical geometry
 
 #specify year
 years <- seq(2012,2019)
-model <- "BarentsSea"
+model <- "WestGreenland"
 
-if(model == "BarentsSea"){
+if(model == "WestGreenland"){
+  message("Loaded West Greenland")
   Domain <- readRDS("./Objects/domain/domainWG.rds") #load domain
 } else if(model == "BarentsSea"){
-  Domain <- readRDS("./Objects/domain/domainBS.rds") #load domain sizes
+  message("Loaded Barents Sea")
+  Domain <- readRDS("./Objects/domain/domainBS.rds") %>% #load domain
+    st_transform(crs = 4326) # Barents Sea in 3035
 } else{
   stop("\nPlease enter valid model.\nOptions:\nWestGreenland\nBarentsSea")
 }
-Domain$Shore <- c("Inshore","Offshore") #adds inshore offshore column
+Domain$Shore <- c("Inshore","Offshore") #adds inshore offshore column if not already present
+
+## initialise
+master <- data.frame(geartype = character(0),domain = character(0),total_fishing_hours = numeric(0))
 
 for (year in years) {
 
@@ -68,7 +73,42 @@ for (year in years) {
   #the next line requires a restart for some odd reason
   aggregate <- aggregate %>% st_drop_geometry() #drop geometry column for write
   
-  write.csv(aggregate,paste0("./Objects/fishing/GlobalFishingWatch/",model,"/002. GFW aggregates/",year," total fishing hours per day per meter squared in the model domain.csv"),
-                             row.names = FALSE)
+  master <- rbind(master,aggregate)
 }
 
+### Aggregate into closer approximations ###
+# filter individual gears + sum
+fishing <- filter(master,master$geartype == "fishing")
+fishing_total <- sum(fishing$total_fishing_hours)/8 #/8 because 8 years (2012-2019)
+
+set_longlines <- filter(master,master$geartype == "set_longlines")
+set_longlines_total <- sum(set_longlines$total_fishing_hours)/8
+
+trawlers <- filter(master,master$geartype == "trawlers")
+trawlers_total <- sum(trawlers$total_fishing_hours)/8
+
+other_purse_seines <- filter(master,master$geartype == "other_purse_seines")
+other_purse_seines_total <- sum(other_purse_seines$total_fishing_hours)/8
+
+fixed_gear <- filter(master,master$geartype == "fixed_gear")
+fixed_gear_total <- sum(fixed_gear$total_fishing_hours)/8
+
+set_gillnets <- filter(master,master$geartype == "set_gillnets")
+set_gillnets_total <- sum(set_gillnets$total_fishing_hours)/8
+
+fishing_activity <- data.frame(gear = c("fishing","set_longlines","trawlers","other_purse_seines","fixed_gear","set_gillnets"),
+                               Activity_.s.m2.d. = c(fishing_total,set_longlines_total,trawlers_total,other_purse_seines_total,
+                                                     fixed_gear_total,set_gillnets_total))
+
+fishing_activity$gear <- case_when(  # convert to StrathE2E guilds
+  fishing_activity$gear == "drifting_longlines" ~ "Longlines and Jigging",
+  fishing_activity$gear == "fishing" ~ "Distribute all",
+  fishing_activity$gear == "fixed_gear" ~ "Distribute fixed",
+  fishing_activity$gear == "other_purse_seines" ~ "Pelagic_trawl+seine",
+  fishing_activity$gear == "set_gillnets" ~ "Gill_nets",
+  fishing_activity$gear == "set_longlines" ~ "Longlines and Jigging",
+  fishing_activity$gear == "trawlers" ~ "Demersal_otter_trawl"
+)
+
+write.csv(fishing_activity,paste0("./Objects/fishing/GlobalFishingWatch/",model,"/002. GFW aggregates/GFW_aggregate.csv"),
+          row.names = FALSE)
