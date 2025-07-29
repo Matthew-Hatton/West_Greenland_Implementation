@@ -1,3 +1,5 @@
+## Functions which take a spreadsheet of formulas for power and activity conversion and turn them into cleaner R functions
+
 landings_convert_to_mMM_m2_y <- function(landings,area){                                                                      # AREA SHOULD BE IN METERS
   example <- data.frame(
     PLANKTIVOROUS = c(349609.761, 358201.8196, 1.713424511, 1.159933629, 0, 1338.310959, 172.8939334, 151.8290908, 5.809130803, 0.73954042, 31.93334073, 0),
@@ -57,7 +59,7 @@ activity <- function(hours_vector,area) { #input is a vector of hours per year p
   return(total) #Returns vector of activities in seconds/m2/day
 }
 
-relative_power <- function(landings,discards,area,activity_vector) { # calculates relative power per gear per guild. acitivity_vector should be supplied in seconds/m2/day
+relative_power <- function(landings,discards,area,activity_vector) { # calculates relative power per gear per guild. activity vector should be supplied in seconds/m2/day
   mult <- (16 * 1000 / (106 * 12))
   plank_mMN <- 0.173 * mult
   dem_mMN <- 0.105 * mult
