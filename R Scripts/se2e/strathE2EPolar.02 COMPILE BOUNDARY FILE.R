@@ -5,20 +5,16 @@
 rm(list=ls())                                                               # Wipe the brain
 Packages <- c("MiMeMo.tools", "exactextractr", "raster", "lubridate")       # List packages
 lapply(Packages, library, character.only = TRUE)   
-source("./Objects/@_Region file.R")
+source("./R Scripts/regionFileWG.R")
 
 Boundary_template <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.2/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Driving/chemistry_BS_2011-2019.csv")  # Read in example boundary drivers
-NH4_boundary <- readRDS("./Objects/NH4 River Concentrations.RDS")
-NO3_boundary <- readRDS("./Objects/NO3 River Concentrations.RDS")
+NH4_boundary <- readRDS("./Objects/rivers/NH4 River Concentrations.RDS")
+NO3_boundary <- readRDS("./Objects/rivers/NO3 River Concentrations.RDS")
 
 ## Iterate over different time periods ##
-
-map2(c(2011),
-     c(2019), ~{
+#### Last minute data manipulation ####
        
-       #### Last minute data manipulation ####
-       
-       My_boundary_data <- readRDS("./Objects/Boundary measurements.rds") %>% # Import data
+       My_boundary_data <- readRDS("./Objects/boundary/Boundary measurements.rds") %>% # Import data
          pivot_longer(
            cols = starts_with("D_") | starts_with("SO_") | starts_with("SI_"), # Pivot relevant columns
            names_to = "Temp", # Temporary column to hold original names
@@ -33,7 +29,7 @@ map2(c(2011),
            Variable = sub("^(SI_|SO_|D_)", "", Temp) # Extract part after underscore
          ) %>%
          dplyr::select(-Temp) %>% # Remove temporary column
-         filter(between(Year, .x, .y)) %>% # Limit to reference period
+         filter(between(Year, 2011, 2019)) %>% # Limit to reference period
          group_by(Month, Compartment, Variable) %>% # Average across years
          summarise(Measured = mean(Measured, na.rm = T), .groups = "drop") %>%
          arrange(Month) %>% # Order months ascending
@@ -46,17 +42,7 @@ map2(c(2011),
          ) %>%
          pivot_wider(names_from = c(Compartment, Variable), names_sep = "_", values_from = Measured) # Spread columns to match template
        
-       
-       # My_overhang <- readRDS("./Objects/overhang exchanges.rds") %>% 
-       #   filter(between(Year, .x, .y), Direction == "Upwelling") %>%                            # Limit to reference period 
-       #   group_by(Month) %>%                                                                        # Average across years
-       #   summarise(NO3 = mean(NO3, na.rm = T),
-       #             NH4 = mean(NH4, na.rm = T),
-       #             Detritus = mean(Detritus, na.rm = T)) %>%  
-       #   ungroup() %>% 
-       #   arrange(Month)                                                                             # Order months ascending
-       
-       My_river_N <- readRDS("./Objects/NE River input.rds") %>%
+       My_river_N <- readRDS("./Objects/rivers/NE River input.rds") %>%
          filter(between(as.numeric(Year), 2011, 2019)) %>%                                          # Limit to reference period
          mutate(Month = lubridate::month(Date)) %>%
          group_by(Month) %>%                                                                        # Average across years
@@ -103,15 +89,10 @@ map2(c(2011),
                 SI_other_ammonia_flux = 0,
                 SO_other_nitrate_flux = 0,   # Can be used for scenarios
                 SO_other_ammonia_flux = 0,
-                # ## Overhang
-                # DO_nitrate = My_overhang$NO3,
-                # DO_ammonia	= My_overhang$NH4,
-                # DO_detritus = My_overhang$Detritus
          ) 
        
-       write.csv(Boundary_new, file = "C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/chemistry_WG_2011-2019.csv", row.names = F)
+write.csv(Boundary_new, file = "C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/chemistry_WG_2011-2019.csv", row.names = F)
        
-     })
 fn <- "C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/chemistry_BS_2011-2019.csv"
 #Check its existence
 if (file.exists(fn)) {
