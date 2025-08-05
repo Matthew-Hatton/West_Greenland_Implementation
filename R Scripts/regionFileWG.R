@@ -5,6 +5,9 @@ library(sf)
 library(ggplot2)
 library(sp)
 
+implementation <- "West_Greenland"
+ssp <- 126
+
 crs <- 3035                                                              # Specify the map projection for the project
 
 ##rough crop
