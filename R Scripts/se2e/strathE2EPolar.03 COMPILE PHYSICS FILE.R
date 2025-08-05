@@ -6,14 +6,13 @@ rm(list=ls())                                                               # Wi
 
 library(MiMeMo.tools)
 
-Force <- "GFDL"
-ssp <- "ssp370" #Define the forcing and ssp we use for this parametrisation
+source("./R Scripts/regionFileWG.R")
 
 Physics_template <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.2/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Driving/physics_BS_2011-2019.csv") # Read in example Physical drivers
 
 #### Last minute data manipulation ####
 
-My_scale <- readRDS("./Objects/Domains.rds") %>%                            # Calculate the volume of the three zones
+My_scale <- readRDS("./Objects/domain/domainWG.rds") %>%                            # Calculate the volume of the three zones
   sf::st_drop_geometry() %>% 
   mutate(S = c(T, T),
          D = c(F, T)) %>% 
@@ -23,13 +22,14 @@ My_scale <- readRDS("./Objects/Domains.rds") %>%                            # Ca
   mutate(Volume = area * abs(Elevation)) %>% 
   dplyr::select(Shore, slab_layer, Volume)
 
-My_light <- readRDS("./Objects/light.rds") %>% 
+My_light <- readRDS("./Objects/physics/light.rds") %>% 
   filter(Forcing == Force & SSP == ssp) %>%               # Limit to reference period and variable
   group_by(Month,SSP,Forcing) %>%                                                       # Average across months
   summarise(Measured = mean(Light, na.rm = T)) %>% 
   ungroup() %>% 
   arrange(Month)                                                            # Order to match template
 
+## BROKEN
 # My_AirTemp <- readRDS("./Objects/Air temp and light.rds") %>% 
 #   filter(between(Year, 2011, 2019), grepl("Air", Type)) %>%                 # Limit to reference period and variable
 #   group_by(Month, Shore) %>%                                                # Average across months
@@ -37,7 +37,7 @@ My_light <- readRDS("./Objects/light.rds") %>%
 #   ungroup() %>% 
 #   arrange(Month)                                                            # Order to match template
 
-My_H_Flows <- readRDS("./Objects/H-Flows.rds") %>% 
+My_H_Flows <- readRDS("./Objects/flows/H-Flows.rds") %>% 
   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
   group_by(across(-c(Year, Flow))) %>%                                      # Group over everything except year and variable of interest
   summarise(Flow = mean(Flow, na.rm = T)) %>%                               # Average flows by month over years
@@ -45,23 +45,25 @@ My_H_Flows <- readRDS("./Objects/H-Flows.rds") %>%
   left_join(My_scale) %>%                                                   # Attach compartment volumes
   mutate(Flow = Flow/Volume) %>%                                            # Scale flows by compartment volume
   mutate(Flow = abs(Flow * 86400)) %>%                                      # Multiply for total daily from per second, and correct sign for "out" flows
-  arrange(Month) %>%                                                             # Order by month to match template
-  filter(SSP == "ssp126" & Forcing == "CNRM")
+  arrange(Month)
   
-My_V_Flows <- readRDS("./Objects/vertical diffusivity.rds") %>%
+
+## BROKEN
+My_V_Flows <- readRDS("./Objects/physics/vertical diffusivity.rds") %>%
   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
   group_by(Month) %>% 
   summarise(V_diff = mean(Vertical_diffusivity, na.rm = T)) %>% 
   ungroup() %>% 
   arrange(Month)                                                            # Order by month to match template
 
-My_volumes <- readRDS("./Objects/TS.rds") %>% 
+My_volumes <- readRDS("./Objects/physics/TS.rds") %>% 
   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
   group_by(Compartment, Month) %>%                                          # By compartment and month
-  summarise(across(c(NO3_avg,NH4_avg,Diatoms_avg,Other_phytoplankton_avg,Detritus_avg,Temperature_avg), mean, na.rm = T)) %>%         # Average across years for multiple columns
+  summarise(across(c(DIN_avg,Phytoplankton_avg,Detritus_avg,Temperature_avg), mean, na.rm = T)) %>%         # Average across years for multiple columns
   ungroup() %>% 
   arrange(Month)                                                            # Order by month to match template
 
+## BROKEN
 # My_SPM <- readRDS("./Objects/Suspended particulate matter.rds") %>% 
 #   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
 #   group_by(Shore, Month) %>% 
@@ -69,6 +71,7 @@ My_volumes <- readRDS("./Objects/TS.rds") %>%
 #   ungroup() %>% 
 #   arrange(Month)                                                            # Order by month to match template
 
+## BROKEN
 # My_Rivers <- readRDS("./Objects/River volume input.rds") %>% 
 #   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
 #   group_by(Month) %>% 
@@ -76,15 +79,17 @@ My_volumes <- readRDS("./Objects/TS.rds") %>%
 #   ungroup() %>% 
 #   arrange(as.numeric(Month))                                                # Order by month to match template
 
+## BROKEN
 # My_Stress <- readRDS("./Objects/Habitat disturbance.rds") %>% 
 #   mutate(Month = factor(Month, levels = month.name)) %>%                    # Set month as a factor for non-alphabetical ordering
 #   arrange(Month)                                                            # Arrange to match template
 
-My_Waves <- readRDS("./Objects/Significant wave height.rds") %>%  #*2000 - 2010   
+My_Waves <- readRDS("./Objects/physics/Significant wave height.rds") %>%  #*2000 - 2010   
   arrange(month) %>% 
   group_by(month) %>% 
   summarise(mean_height = mean(mean_height))# Arrange to match template
 
+## BROKEN
 #### Ice ####
 My_ice <- readRDS("./Objects/Ice_Summary.rds") %>% 
   filter(Shore %in% c("Inshore","Offshore")) %>%  # Remove Buffer Zone
