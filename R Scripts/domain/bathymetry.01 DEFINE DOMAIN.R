@@ -3,13 +3,14 @@ rm(list=ls())
 Packages <- c("tidyverse", "sf", "stars", "rnaturalearth", "raster")        # List handy packages
 lapply(Packages, library, character.only = TRUE)                            # Load packages
 
-source("@_Region file.R")                                       # Define project region 
+source("./R Scripts/regionFileWG.R")                                       # Define project region 
 
 world <- ne_countries(scale = "medium", returnclass = "sf") %>%             # Get a world map
   st_transform(crs = crs)                                                   # Assign polar projection
-setwd("C:/Users/psb22188/Documents/PhD/22-23/West Greenland/NEMO/Data Wrangling/Jacks Way")
-GEBCO <- raster("Figures and Data\\RAW\\GEBCO\\GEBCO_2020.nc")
-GFW <- raster("Figures and Data\\RAW\\GFW\\distance-from-shore.tif")
+#setwd("C:/Users/psb22188/Documents/PhD/22-23/West Greenland/NEMO/Data Wrangling/Jacks Way")
+
+GEBCO <- raster("I:/Science/MS/users/students/Hatton_Matthew/Documents/PhD/22-23/West Greenland/NEMO/Data Wrangling/Jacks Way/Figures and Data/RAW/GEBCO/GEBCO_2020.nc")
+GFW <- raster("I:/Science/MS/users/students/Hatton_Matthew/Documents/PhD/22-23/West Greenland/NEMO/Data Wrangling/Jacks Way/Figures and Data/RAW/GFW/distance-from-shore.tif")
 
 crop <- as(extent(-61,-45,59,72.5),"SpatialPolygons") #defined as (xmin,xmax,ymin,ymax) <- (W,E,S,N)
 crs(crop) <- crs(GEBCO)
