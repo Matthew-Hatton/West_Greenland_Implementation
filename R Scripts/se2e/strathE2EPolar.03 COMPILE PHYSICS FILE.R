@@ -47,10 +47,8 @@ My_H_Flows <- readRDS("./Objects/flows/H-Flows.rds") %>%
   mutate(Flow = abs(Flow * 86400)) %>%                                      # Multiply for total daily from per second, and correct sign for "out" flows
   arrange(Month)
   
-
-## BROKEN
-My_V_Flows <- readRDS("./Objects/physics/vertical diffusivity.rds") %>%
-  filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
+My_V_Flows <- readRDS("./Objects/vertical boundary/vertical diffusivity.rds") %>%
+  filter(between(Year, 2011, 2019) & SSP %in% c("hist",ssp) & Forcing == Force) %>%                                     # Limit to reference period
   group_by(Month) %>% 
   summarise(V_diff = mean(Vertical_diffusivity, na.rm = T)) %>% 
   ungroup() %>% 
@@ -71,29 +69,24 @@ My_volumes <- readRDS("./Objects/physics/TS.rds") %>%
 #   ungroup() %>% 
 #   arrange(Month)                                                            # Order by month to match template
 
-## BROKEN
-# My_Rivers <- readRDS("./Objects/River volume input.rds") %>% 
-#   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
-#   group_by(Month) %>% 
-#   summarise(Runoff = mean(Runoff, na.rm = T)) %>%                           # Average by month across years
-#   ungroup() %>% 
-#   arrange(as.numeric(Month))                                                # Order by month to match template
+My_Rivers <- readRDS("./Objects/rivers/NE River input.rds") %>%
+  filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
+  mutate(Month = as.integer(format(.$Date, "%m"))) %>% # convert to month
+  group_by(Month) %>%
+  summarise(Runoff = mean(Runoff, na.rm = T)) %>%                           # Average by month across years
+  ungroup() %>%
+  arrange(as.numeric(Month))                                                # Order by month to match template
 
-## BROKEN
-# My_Stress <- readRDS("./Objects/Habitat disturbance.rds") %>% 
-#   mutate(Month = factor(Month, levels = month.name)) %>%                    # Set month as a factor for non-alphabetical ordering
-#   arrange(Month)                                                            # Arrange to match template
+My_stress <- readRDS("./Objects/physics/My_Stress.RDS")
 
 My_Waves <- readRDS("./Objects/physics/Significant wave height.rds") %>%  #*2000 - 2010   
   arrange(month) %>% 
   group_by(month) %>% 
   summarise(mean_height = mean(mean_height))# Arrange to match template
 
-## BROKEN
 #### Ice ####
-My_ice <- readRDS("./Objects/Ice_Summary.rds") %>% 
+My_ice <- readRDS(paste0("./Objects/physics/",Force,".",ssp,".Ice.Summary.rds")) %>% 
   filter(Shore %in% c("Inshore","Offshore")) %>%  # Remove Buffer Zone
-  filter(Scenario == ssp & Model == Force) %>%  # Access just one scenario
   filter(Year %in% seq(2011,2019)) %>%  # Filter down to just the target year
   group_by(Month,Shore) %>% 
   summarise(Ice_Pres = mean(Ice_pres),
@@ -120,25 +113,18 @@ Physics_new <- mutate(Physics_template, SLight = My_light$Measured,
                       D_temp = filter(My_volumes, Compartment == "Offshore D")$Temperature_avg,
                       SI_temp = filter(My_volumes, Compartment == "Inshore S")$Temperature_avg ,
                       ## River inflow,
-                      #Rivervol_SI = My_Rivers$Runoff / filter(My_scale, Shore == "Inshore")$Volume, # Scale as proportion of inshore volume
-                      Rivervol_SI = Physics_template$Rivervol_SI, # Scale as proportion of inshore volume
+                      Rivervol_SI = My_Rivers$Runoff / filter(My_scale, Shore == "Inshore")$Volume, # Scale as proportion of inshore volume
                       ## Vertical diffusivity
                       log10Kvert = log10(My_V_Flows$V_diff),
                       # mixLscale = mixLscale, # Length scale over which vertical diffusion acts, nominal
                       mixLscale = Physics_template$mixLscale, # Length scale over which vertical diffusion acts, nominal
                       ## Daily proportion disturbed by natural bed shear stress
-                      # habS1_pdist = filter(My_Stress, Shore == "Inshore", Habitat == "Silt")$Disturbance, 
-                      # habS2_pdist = filter(My_Stress, Shore == "Inshore", Habitat == "Sand")$Disturbance,
-                      # habS3_pdist = filter(My_Stress, Shore == "Inshore", Habitat == "Gravel")$Disturbance,
-                      # habD1_pdist = filter(My_Stress, Shore == "Offshore", Habitat == "Silt")$Disturbance,
-                      # habD2_pdist = filter(My_Stress, Shore == "Offshore", Habitat == "Sand")$Disturbance,
-                      # habD3_pdist = filter(My_Stress, Shore == "Offshore", Habitat == "Gravel")$Disturbance,
-                      habS1_pdist = Physics_template$habS1_pdist,
-                      habS2_pdist = Physics_template$habS2_pdist,
-                      habS3_pdist = Physics_template$habS3_pdist,
-                      habD1_pdist = Physics_template$habD1_pdist,
-                      habD2_pdist = Physics_template$habD2_pdist,
-                      habD3_pdist = Physics_template$habD3_pdist,
+                      habS1_pdist = My_stress$habS1_pdist,
+                      habS2_pdist = My_stress$habS2_pdist,
+                      habS3_pdist = My_stress$habS3_pdist,
+                      habD1_pdist = My_stress$habD1_pdist,
+                      habD2_pdist = My_stress$habD2_pdist,
+                      habD3_pdist = My_stress$habD3_pdist,
                       ## Monthly mean significant wave height inshore                     
                       Inshore_waveheight = My_Waves$mean_height,
                       ## Cryo variables
