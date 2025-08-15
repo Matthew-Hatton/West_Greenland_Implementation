@@ -1,3 +1,6 @@
+## script which intersects each point within the domain with the sediment map provided by Yesson
+## Takes quite a while to execute
+
 rm(list = ls()) # reset
 
 library(MiMeMo.tools) # everything we need
@@ -18,8 +21,8 @@ Depths <- GEBCO
 
 depth_df <- as.data.frame(Depths, xy = TRUE) %>% 
   mutate(shore = case_when(
-    Elevation.relative.to.sea.level >= -20 ~ "Inshore",
-    Elevation.relative.to.sea.level < -20 ~ "Offshore",
+    Elevation.relative.to.sea.level >= -20 ~ "in",
+    Elevation.relative.to.sea.level < -20 ~ "off",
   )) %>% 
   st_as_sf(coords = c("x","y"),crs = 4326) %>% 
   st_transform(crs = crs)# from domain script
@@ -32,6 +35,3 @@ habitat <- st_read(dsn = "./Objects/physical/GreenlandHabitatClasses.kml") %>%
 intersection <- st_intersection(depth_df,habitat)
 
 saveRDS(intersection,"./Objects/physical/habitat_depth intersection.RDS")
-# Read in model
-
-# Calculate disturbance

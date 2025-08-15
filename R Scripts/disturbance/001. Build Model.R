@@ -14,4 +14,8 @@ mod <- step(mod0) # suggests we can remove sediment
 
 mod <- lm(formula = log(dist) ~ depth + shore,data = prop_disturbed)
 
+newdata <- data.frame(depth = 200,
+                      shore = "off")
+predict(mod,newdata)
+
 saveRDS(mod,"./Objects/physics/Disturbance Model.rds")
