@@ -41,16 +41,7 @@ NO3_boundary <- readRDS("./Objects/rivers/NO3 River Concentrations.RDS")
            )
          ) %>%
          pivot_wider(names_from = c(Compartment, Variable), names_sep = "_", values_from = Measured) # Spread columns to match template
-       
-       My_river_N <- readRDS("./Objects/rivers/NE River input.rds") %>%
-         filter(between(as.numeric(Year), 2011, 2019)) %>%                                          # Limit to reference period
-         mutate(Month = lubridate::month(Date)) %>%
-         group_by(Month) %>%                                                                        # Average across years
-         summarise(NO3 = mean(NO3, na.rm = T),
-                   NH4 = mean(NH4, na.rm = T)) %>%
-         ungroup() %>%
-         arrange(Month)                                                                             # Order months ascending
-       # 
+
        My_atmosphere <- readRDS(stringr::str_glue("./Objects/Atmospheric N deposition.rds")) %>%
          filter(between(Year, 2010, 2019)) %>%     
          filter(SSP == ssp) %>% # Limit to reference period

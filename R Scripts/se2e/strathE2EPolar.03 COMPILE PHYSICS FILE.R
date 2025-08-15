@@ -54,6 +54,7 @@ My_V_Flows <- readRDS("./Objects/vertical boundary/vertical diffusivity.rds") %>
   ungroup() %>% 
   arrange(Month)                                                            # Order by month to match template
 
+## CHECK FOR SSP AND FORCING HERE
 My_volumes <- readRDS("./Objects/physics/TS.rds") %>% 
   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
   group_by(Compartment, Month) %>%                                          # By compartment and month
