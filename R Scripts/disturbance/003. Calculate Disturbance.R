@@ -20,7 +20,7 @@ intersection_agg <- intersection %>% ## aggregation into SE2E terms
     Name == "Bedrock with Sand" ~ "Gravel",
     T ~ Name
   )) %>% 
-  #rename(depth = Elevation.relative.to.sea.level) %>% 
+  rename(depth = Elevation.relative.to.sea.level) %>%
   rename(sediment = Name)
 
 # ## Temp due to saving bug ##
