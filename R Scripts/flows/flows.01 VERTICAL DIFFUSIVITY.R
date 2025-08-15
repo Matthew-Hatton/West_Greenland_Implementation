@@ -17,7 +17,7 @@ deep_convection_is <- 0.14                                                      
 
 ## For more discussion see the appropriate entry in ./Notes
 
-total_mixing <- list.files("./Objects/vertical boundary/", full.names = T) %>%  # Import
+total_mixing <- list.files("./Objects/vertical boundary/vertical boundary/", full.names = T) %>%  # Import
   future_map(readRDS) %>% 
   rbindlist() %>% 
   group_by(Month) %>%                                                                   
@@ -31,7 +31,7 @@ ggplot(total_mixing) +
 
 #### Mean vertical diffusivity ignoring deep convection ####
 
-normal_mixing <- list.files("./Objects/vertical boundary/", full.names = T) %>% # Import data
+normal_mixing <- list.files("./Objects/vertical boundary/vertical boundary/", full.names = T) %>% # Import data
   future_map(readRDS) %>% 
   rbindlist() %>% 
   dplyr::select(Vertical_diffusivity, Year, Month, Forcing, SSP) %>%                   # Discard excess variables
@@ -61,6 +61,6 @@ fix <- pmap(runs, function(Force, S){
   rbindlist() %>% 
   distinct(Year, Month,Forcing, SSP, .keep_all = TRUE)
 
-saveRDS(fix, "./Objects/vertical diffusivity.rds")
+saveRDS(fix, "./Objects/vertical boundary/vertical diffusivity.rds")
 
 
