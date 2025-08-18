@@ -3,14 +3,14 @@
 #### Setup ####
 rm(list=ls())                                                                               # Wipe the brain
 library(MiMeMo.tools)
-source("./Objects/@_Region file.R")
+source("./R Scripts/regionFileWG.R")
 #Read in example physical parameters file
 Physical_parameters <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.2/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Param/physical_parameters_BS.csv")
-Domains <- readRDS("./Objects/Domains.RDS") %>%  #read domain file
+Domains <- readRDS("./Objects/domain/domainWG.RDS") %>%  #read domain file
   st_transform(crs = crs)
 
 #### Layer Thickness ####
-My_space <- readRDS("./Objects/Domains.rds") %>%                            # Calculate the volume of the three zones
+My_space <- readRDS("./Objects/domain/domainWG.rds") %>%                            # Calculate the volume of the three zones
   sf::st_drop_geometry() %>% 
   mutate(S = T,
          D = case_when(Shore == "Inshore" ~ F,
@@ -18,8 +18,8 @@ My_space <- readRDS("./Objects/Domains.rds") %>%                            # Ca
   gather(key = "Depth", value = "Exists", S, D) %>% 
   filter(Exists == T) %>%
   mutate(Elevation = case_when(Shore == "Inshore" ~ Elevation,
-                               Shore == "Offshore" & Depth == "D" ~ Elevation + SDepth,
-                               Shore == "Offshore" & Depth == "S" ~ -SDepth,)) %>% 
+                               Shore == "Offshore" & Depth == "D" ~ Elevation + s_depth,
+                               Shore == "Offshore" & Depth == "S" ~ -s_depth,)) %>% 
   mutate(Volume = area * abs(Elevation))
 
 Physical_parameters[1,"Value"] <- filter(My_space, Shore == "Offshore", Depth == "S")$Elevation * -1 # Offshore_Shallow_layer_thickness_(m)
@@ -27,9 +27,9 @@ Physical_parameters[3,"Value"] <- filter(My_space, Shore == "Inshore", Depth == 
 
 #### Sediment ####
 # Read in Sediment Proportions
-in_sed_prop <- readRDS("./Objects/Inshore sediment proportions.RDS")
+in_sed_prop <- readRDS("./Objects/physical/Inshore sediment proportions.RDS")
 
-off_sed_prop <- readRDS("./Objects/Offshore sediment proportions.RDS")
+off_sed_prop <- readRDS("./Objects/physical/Offshore sediment proportions.RDS")
 
 # Order of the parameter file won't change so can hard code in changes
 Physical_parameters$Value[5:8] <- in_sed_prop$Proportion #Inshore
@@ -68,7 +68,7 @@ Physical_parameters[48,"Value"] <- 0                     # 1 to use the followin
 # Physical_parameters[54,"Value"] <- filter(My_sediment, Habitat == "Offshore Gravel")$Nitrogen    # Defined_total_N%_of_offshore_sediment_d3_(%DW)
 
 #Remove old
-fn <- "C:/Users/psb22188/AppData/Local/R/win-library/4.2/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Param/physical_parameters_BS.csv"
+fn <-  paste0("C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland.",Force,".",ssp,"./2011-2019/Param/physical_parameters_BS.csv")
 #Check its existence
 if (file.exists(fn)) {
   #Delete file if it exists
@@ -76,5 +76,5 @@ if (file.exists(fn)) {
 }
 
 write.csv(Physical_parameters,
-          file = "C:/Users/psb22188/AppData/Local/R/win-library/4.2/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Param/physical_parameters_WG.csv",
+          file =  paste0("C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland.",Force,".",ssp,"./2011-2019/Param/physical_parameters_WG.csv"),
           row.names = F)

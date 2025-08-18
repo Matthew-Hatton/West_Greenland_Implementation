@@ -55,20 +55,20 @@ My_V_Flows <- readRDS("./Objects/vertical boundary/vertical diffusivity.rds") %>
   arrange(Month)                                                            # Order by month to match template
 
 ## CHECK FOR SSP AND FORCING HERE
-My_volumes <- readRDS("./Objects/physics/TS.rds") %>% 
+My_volumes <- readRDS(paste0("./Objects/physics/",Force,".",ssp,".TS.rds")) %>% 
   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
   group_by(Compartment, Month) %>%                                          # By compartment and month
-  summarise(across(c(DIN_avg,Phytoplankton_avg,Detritus_avg,Temperature_avg), mean, na.rm = T)) %>%         # Average across years for multiple columns
+  summarise(across(c(Diatoms_avg,Other_phytoplankton_avg,Detritus_avg,Temperature_avg), mean, na.rm = T)) %>%         # Average across years for multiple columns
   ungroup() %>% 
   arrange(Month)                                                            # Order by month to match template
 
-## BROKEN
-# My_SPM <- readRDS("./Objects/Suspended particulate matter.rds") %>% 
-#   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
-#   group_by(Shore, Month) %>% 
-#   summarise(SPM = mean(SPM, na.rm = T)) %>%                                 # Average by month across years
-#   ungroup() %>% 
-#   arrange(Month)                                                            # Order by month to match template
+## BS data
+My_SPM <- readRDS("./Objects/physics/Suspended particulate matter.rds") %>%
+  filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
+  group_by(Shore, Month) %>%
+  summarise(SPM = mean(SPM, na.rm = T)) %>%                                 # Average by month across years
+  ungroup() %>%
+  arrange(Month)                                                            # Order by month to match template
 
 My_Rivers <- readRDS("./Objects/rivers/NE River input.rds") %>%
   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
@@ -105,9 +105,9 @@ Physics_new <- mutate(Physics_template, SLight = My_light$Measured,
                       SO_SI_flow = filter(My_H_Flows, slab_layer == "S", Shore == "Offshore", Neighbour == "Inshore", Direction == "Out")$Flow,
                       Upwelling = 0, # Nominal value   
                       ## log e transformed suspended particulate matter concentration in zones
-                      # SO_LogeSPM = log(filter(My_SPM, Shore == "Offshore")$SPM),
+                      SO_LogeSPM = log(filter(My_SPM, Shore == "Offshore")$SPM),
                       SO_LogeSPM = Physics_template$SO_LogeSPM,
-                      # SI_LogeSPM = log(filter(My_SPM, Shore == "Inshore")$SPM),
+                      SI_LogeSPM = log(filter(My_SPM, Shore == "Inshore")$SPM),
                       SI_LogeSPM = Physics_template$SI_LogeSPM,
                       ## Temperatures in volumes for each zone
                       SO_temp = filter(My_volumes, Compartment == "Offshore S")$Temperature_avg,
@@ -143,10 +143,4 @@ Physics_new <- mutate(Physics_template, SLight = My_light$Measured,
                       # SI_AirTemp = filter(My_AirTemp, Shore == "Inshore")$Measured
                       )
 
-write.csv(Physics_new, file = "C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/physics_WG_2011-2019.csv", row.names = F)
-fn <- "C:/Users/psb22188/AppData/Local/R/win-library/4.2/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/physics_BS_2011-2019.csv"
-#Check its existence
-if (file.exists(fn)) {
-  #Delete file if it exists
-  file.remove(fn)
-}
+write.csv(Physics_new, file = paste0("C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland.",Force,".",ssp,"./2011-2019/Driving/physics_WG_2011-2019.csv"), row.names = F)

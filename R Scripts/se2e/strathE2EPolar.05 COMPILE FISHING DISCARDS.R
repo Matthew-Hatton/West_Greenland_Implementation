@@ -5,9 +5,9 @@
 rm(list=ls())                                                                               # Wipe the brain
 
 library(MiMeMo.tools)
-source("./R Scripts/fishing/functions/fishing functions.R")
+source("./R Scripts/regionFileWG.R")
 
-domains <- readRDS("./Objects/Domains.rds") %>%                                             # Load SF polygons of the MiMeMo model domains
+domains <- readRDS("./Objects/domain/domainWG.rds") %>%                                             # Load SF polygons of the MiMeMo model domains
   st_transform(crs = 4326)
 
                                                                                             # Read in example activity template
@@ -49,6 +49,6 @@ discards_template$Discardrate_CT <- 0                                           
 discards_template$Gear_name[discards_template$Gear_name == "Recreational"] <- "Subsistence" #change recreational to subsistence
 discards_template$Gear_code[discards_template$Gear_code == "Rec"] <- "Sub"                  #and the code
 
-write.csv(discards_template, file = "C:/Users/psb22188/AppData/Local/R/win-library/4.2/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Param/fishing_discards_WG_2011-2019.csv",
+write.csv(discards_template, file = paste0("C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland.",Force,".",ssp,"./2011-2019/Param/fishing_discards_WG_2011-2019.csv"),
           row.names = F)
 

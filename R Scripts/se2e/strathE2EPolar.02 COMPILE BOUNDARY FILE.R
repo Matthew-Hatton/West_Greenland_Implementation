@@ -44,7 +44,7 @@ NO3_boundary <- readRDS("./Objects/rivers/NO3 River Concentrations.RDS")
 
        My_atmosphere <- readRDS(stringr::str_glue("./Objects/Atmospheric N deposition.rds")) %>%
          filter(between(Year, 2010, 2019)) %>%     
-         filter(SSP == ssp) %>% # Limit to reference period
+         filter(SSP == ssp | SSP == "hist") %>% # Limit to reference period
          group_by(Month, Oxidation_state, Shore,  Year) %>%
          summarise(Measured = sum(Measured, na.rm = T)) %>%                                         # Sum across deposition states
          summarise(Measured = mean(Measured, na.rm = T)) %>%                                        # Average over years
@@ -82,11 +82,4 @@ NO3_boundary <- readRDS("./Objects/rivers/NO3 River Concentrations.RDS")
                 SO_other_ammonia_flux = 0,
          ) 
        
-write.csv(Boundary_new, file = "C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/chemistry_WG_2011-2019.csv", row.names = F)
-       
-fn <- "C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/chemistry_BS_2011-2019.csv"
-#Check its existence
-if (file.exists(fn)) {
-  #Delete file if it exists
-  file.remove(fn)
-}
+       write.csv(Boundary_new, file = paste0("C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland.",Force,".",ssp,"./2011-2019/Driving/chemistry_WG_2011-2019.csv"), row.names = F)
