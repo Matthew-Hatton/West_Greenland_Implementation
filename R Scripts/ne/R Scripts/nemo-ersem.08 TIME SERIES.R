@@ -6,7 +6,7 @@
 
 rm(list=ls())                                                                   # Wipe the brain
 
-packages <- c("tidyverse", "nemoRsem", "furrr", "tictoc")                       # List packages
+packages <- c("tidyverse", "nemoRsem", "furrr", "tictoc","purrr")                       # List packages
 lapply(packages, library, character.only = TRUE)                                # Load packages
 plan(multisession)                                                              # Instructions for parallel processing
 
@@ -14,14 +14,16 @@ plan(multisession)                                                              
 
 tic("Creating time series by compartment")                                      # Time the data extraction
 
-Months <- list.files("./Objects/NE_Months/", full.names = T) %>%                # Get list of NEMO-MEDUSA files
+ts <- function(ssp,force){
+Months <- list.files("./Objects/NEMO RAW/NE_Months/", full.names = T) %>%                # Get list of NEMO-MEDUSA files
   future_map(NE_volume_summary,                                                 # Read in the months and calculate mean compartments
              ice = FALSE,
              .progress = T) %>%      
   data.table::rbindlist() %>%                                                   # Combine timesteps into series
-  select(-c(x_avg, y_avg, longitude_avg, latitude_avg, Bathymetry_avg, weights_avg))                                                                  # Drop uneccessary columns
+  select(-c(x_avg, y_avg, longitude_avg, latitude_avg, Bathymetry_avg, weights_avg)) %>%                                                                 # Drop uneccessary columns
+  filter(Forcing == force & SSP == ssp | SSP == "hist")
   
-TS <- list.files("./Objects/NE_Days/", full.names = T) %>%                      # Get list of NEMO-MEDUSA files
+TS <- list.files("./Objects/NEMO RAW/NE_Days/", full.names = T) %>%                      # Get list of NEMO-MEDUSA files
   future_map(NE_volume_summary,                                                 # Read in the months and calculate mean compartments
              ice = FALSE,
              .progress = T) %>%      
@@ -30,8 +32,20 @@ TS <- list.files("./Objects/NE_Days/", full.names = T) %>%                      
   select(-c(x_avg, y_avg, longitude_avg, latitude_avg, Bathymetry_avg, weights_avg)) %>%                                                                  # Drop uneccessary columns
   mutate(date = as.Date(paste("15", Month, Year, sep = "/"), format = "%d/%m/%Y"), # Create a single date column for plotting
          Compartment = paste(Shore, slab_layer, sep = " ")) %>%                 # Build a single compartment column for plotting by
-  filter(Compartment != "Inshore D")                                            # A non-existant combination gets introduced when extracting data because the GEBCO and NM bathymetries differ
+  filter(Compartment != "Inshore D") %>%                                            # A non-existant combination gets introduced when extracting data because the GEBCO and NM bathymetries differ
+  filter(Forcing == force & SSP == ssp | SSP == "hist")
+  
+saveRDS(TS, paste0("./Objects/physics/",force,".",ssp,".TS.rds"))                                                 # Save out time series in the folder above
+}
 
-saveRDS(TS, "./Objects/TS.rds")                                                 # Save out time series in the folder above
+# force <- c("CNRM","GFDL")
+# ssp   <- c("ssp126","ssp370")
+force <- c("CNRM","GFDL")
+ssp   <- c("ssp126","ssp370")
+
+grid <- expand.grid(force = force, ssp = ssp)
+
+pmap(grid, function(ssp, force) ts(ssp, force))
+
 toc()                                                                           # Stop timing
 
