@@ -4,8 +4,9 @@ rm(list = ls()) #reset
 library(tidyverse)
 library(MiMeMo.tools)
 library(tictoc)
-
 source("./R Scripts/regionFileWG.R")
+
+message(paste0("Forcing: ",Force, "\nSSP: ",ssp))
 
 #### Batch process scripts ####
 len <- length(list.files("./R Scripts/se2e/",full.names = T))

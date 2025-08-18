@@ -92,7 +92,7 @@ WG_discards[7,3] <- shrimp_trawl %>% filter(Guild == "Planktivore") %>% .$Propor
 
 
 WG_discards$Discardrate_DF[1:9] = 0 #no discarding greenland halibut in West Greenland (GHL fishery main focal point in WG)
-
+WG_discards$Discardrate_CT[1:9] = 0 # no discarding cetaceans in WG
 
 write.csv(WG_discards,"./Objects/fishing/Discards/fishing_discards_WG_2011-2019.csv",
           row.names = FALSE)

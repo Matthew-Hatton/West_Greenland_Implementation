@@ -7,7 +7,7 @@ library(sp)
 
 implementation <- "West_Greenland"
 ssp <- "ssp126"
-Force <- "GFDL"
+Force <- "CNRM"
 
 crs <- 3035                                                              # Specify the map projection for the project
 
