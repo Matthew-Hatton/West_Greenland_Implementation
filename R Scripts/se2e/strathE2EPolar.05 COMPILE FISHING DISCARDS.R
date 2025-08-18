@@ -3,7 +3,7 @@
 #### Setup ####
 
 rm(list=ls())                                                                               # Wipe the brain
-
+message("Compiling Fishing Discards")
 library(MiMeMo.tools)
 source("./R Scripts/regionFileWG.R")
 

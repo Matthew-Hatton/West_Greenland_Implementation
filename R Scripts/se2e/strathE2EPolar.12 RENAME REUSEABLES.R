@@ -3,7 +3,7 @@
 #### Setup ####
 
 rm(list=ls())                                                                               # Wipe the brain
-
+message("Renaming Reusables")
 library(MiMeMo.tools)
 source("./R Scripts/regionFileWG.R")
 #This will throw a warning and FALSE if the file doesn't exist (because it's already been renamed)

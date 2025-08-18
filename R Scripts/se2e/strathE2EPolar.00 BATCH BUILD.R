@@ -8,5 +8,6 @@ library(tictoc)
 source("./R Scripts/regionFileWG.R")
 
 #### Batch process scripts ####
-scripts <- list.files("./R Scripts/se2e/",full.names = T)[2:length(scripts)] %>% # all except first (this one)
-  map(MiMeMo.tools::execute)                                                           # Run the scripts
+len <- length(list.files("./R Scripts/se2e/",full.names = T))
+scripts <- list.files("./R Scripts/se2e/",full.names = T)[3:len] %>% # all except first (this one)
+  map(MiMeMo.tools::execute) # Run the scripts
