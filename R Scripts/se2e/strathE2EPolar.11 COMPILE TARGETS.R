@@ -11,7 +11,6 @@ targets <- read.csv("./Objects/target/annual_observed_WG_2011-2019.csv")
 fishing <- readRDS("./Objects/fishing/Target/Landings_by_guild.RDS")
 
 ## LONG WAY, BUT SAFER ##
-library(dplyr)
 
 targets <- targets %>%
   mutate(
@@ -27,6 +26,13 @@ targets <- targets %>%
       TRUE ~ Annual_measure
     )
   )
+targets[68,3] <- 0 # switch for Demersal fish discards
+targets[87,3] <- 0 # switch for Obs_AMJJAS_offshore_ice_alg
+targets[88,3] <- 0 # switch for Obs_AMJJAS_inshore_ice_alg
 
-write.csv(targets, file = paste0("C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland.",Force,".",ssp,"./2011-2019/Target/annual_observed_WG_2011-2019.csv"),
+## calculate SD as 75% of target value
+target_new <- targets %>%
+  mutate(SD_of_measure = Annual_measure * 0.75)
+
+write.csv(target_new, file = paste0("C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland.",Force,".",ssp,"./2011-2019/Target/annual_observed_WG_2011-2019.csv"),
           row.names = F)
