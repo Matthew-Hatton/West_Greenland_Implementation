@@ -72,6 +72,6 @@ split_files %>%
     month <- .x$Month
     # Call your get_icemod function
     get_icemod(path, file, scheme_result, start = start, count = count, ice_scheme = ice_scheme,
-               year = year, month = month, forcing = forcing,SSP = SSP,out.dir = "../../Paper 3/Paper-3/Objects/Driving/Ice Extraction")
+               year = year, month = month, forcing = forcing,SSP = SSP)
   },.progress = T)
 toc()
