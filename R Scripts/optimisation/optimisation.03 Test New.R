@@ -15,9 +15,8 @@ ycurve <- e2ep_run_ycurve(model = model,nyears = 50,c(0,1,2,3,4),selection = "DE
 e2ep_plot_ycurve(model = model,results = ycurve,selection = "DEMERSAL")
 
 library(StrathE2EPolar)
-library(tictoc)
 tic()
-model <- e2ep_read("Barents_Sea",
+model <- e2ep_read("West_Greenland.CNRM.ssp126",
                    "2011-2019")
 results <- e2ep_run(model = model,nyears = 50)
 toc()
