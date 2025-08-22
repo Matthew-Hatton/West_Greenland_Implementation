@@ -10,3 +10,4 @@
 *.RDataTmp1
 *Figures
 *StrathE2EPolar_Implementation
+.RDataTmp2
