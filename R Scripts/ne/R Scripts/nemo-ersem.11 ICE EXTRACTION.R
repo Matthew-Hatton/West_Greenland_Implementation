@@ -20,7 +20,7 @@ crop <- readRDS("./Objects/domain/domainWG.rds") %>%  # Load SF polygons of the 
   summarise() %>%                                                           # Combine polygons to avoid double sampling
   mutate(Shore = "Buffer")
 
-Bathymetry <- readRDS("./Objects/NE_grid.rds") %>%                          # Import NEMO-ERSEM bathymetry
+Bathymetry <- readRDS("./Objects/domain/NE_grid.rds") %>%                          # Import NEMO-ERSEM bathymetry
   st_drop_geometry() %>%                                                    # Drop sf geometry column 
   select(-c("x", "y"), latitude = Latitude, longitude = Longitude)          # Clean column so the bathymetry is joined by lat/lon
 
