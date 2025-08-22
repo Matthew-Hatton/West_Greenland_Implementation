@@ -8,7 +8,7 @@ rm(list=ls())                                                               # Wi
 
 packages <- c("tidyverse", "nemoRsem", "furrr", "ncdf4")                                 # List packages
 lapply(packages, library, character.only = TRUE)                            # Load packages
-source("./Objects/@_Region file.R")   # Define project region 
+source("./R Scripts/regionFileWG.R")   # Define project region 
 sf_use_s2(F) #switch off spherical geometry
 
 plan(multisession)                                                          # Choose the method to parallelise by with furrr
@@ -23,17 +23,17 @@ all_files <- rbind(categorise_files("I:/Science/MS-Marine/MA/CNRM_ssp370", recur
   dplyr::select(-Name) #%>% 
   #filter(Year > 2009)
 
-domains <- readRDS("./Objects/Domains.rds") %>%                             # Load SF polygons of the MiMeMo model domains
+domains <- readRDS("./Objects/domain/domainWG.rds") %>%                             # Load SF polygons of the MiMeMo model domains
   dplyr::select(-c(Elevation, area))                                               # Drop unneeded data which would get included in new NM files
 
-crop <- readRDS("./Objects/Domains.rds") %>%  # Load SF polygons of the MiMeMo model domains
+crop <- readRDS("./Objects/domain/domainWG.rds") %>%  # Load SF polygons of the MiMeMo model domains
   st_transform(crs = 3035) %>% #convert to 3035 for buffer
   st_buffer(dist = 50000) %>%                                               # It needs to be a bit bigger for sampling flows at the domain boundary
   st_transform(crs = 4326) %>% #convert back incase it needs to be in 4326 for some
   summarise() %>%                                                           # Combine polygons to avoid double sampling
   mutate(Shore = "Buffer")
 
-Bathymetry <- readRDS("./Objects/NE_grid.rds") %>%                          # Import NEMO-ERSEM bathymetry
+Bathymetry <- readRDS("./Objects/domain/NE_grid.rds") %>%                          # Import NEMO-ERSEM bathymetry
   st_drop_geometry() %>%                                                    # Drop sf geometry column 
   dplyr::select(-c("x", "y"), latitude = Latitude, longitude = Longitude)          # Clean column so the bathymetry is joined by lat/lon
 
@@ -42,8 +42,8 @@ Bathymetry <- readRDS("./Objects/NE_grid.rds") %>%                          # Im
 example <- filter(all_files, Type == "thetao_con") %>% 
   slice(1) 
 
-scheme <- scheme_strathE2E(get_spatial(paste0(example$Path, example$File)),
-                           Bathymetry, SDepth, DDepth, crop) %>% 
+scheme <- scheme_strathE2E(get_spatial(paste0(example$Path, example$File),depthvar = "deptht"),
+                           Bathymetry, s_depth, d_depth, crop) %>% 
   dplyr::select(x, y, layer, group, weight, slab_layer, longitude, latitude, Bathymetry) %>%   # Get a scheme to summarise for StrathE2E
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = F) %>% # Convert to sf object
   st_join(st_transform(domains, crs = 4326)) %>%                            # Attach model zone information
@@ -57,10 +57,10 @@ scheme_result <- arrange(scheme, group) %>%                                 # Cr
   dplyr::select(x, y, slab_layer, longitude, latitude, Shore, Bathymetry) %>% 
   distinct() %>% 
   mutate(slab_layer = if_else(slab_layer == 1, "S", "D"),
-         weights = case_when(slab_layer == "S" & Bathymetry >= SDepth ~ SDepth,     # Weights for zonal averages by thickness of water column
-                             slab_layer == "S" & Bathymetry < SDepth ~ Bathymetry,
-                             slab_layer == "D" & Bathymetry >= DDepth ~ (DDepth - SDepth),
-                             slab_layer == "D" & Bathymetry < DDepth ~ (Bathymetry - SDepth)))
+         weights = case_when(slab_layer == "S" & Bathymetry >= s_depth ~ s_depth,     # Weights for zonal averages by thickness of water column
+                             slab_layer == "S" & Bathymetry < s_depth ~ Bathymetry,
+                             slab_layer == "D" & Bathymetry >= d_depth ~ (d_depth - s_depth),
+                             slab_layer == "D" & Bathymetry < d_depth ~ (Bathymetry - s_depth)))
 
 look <- filter(scheme_result, slab_layer == "S") 
 
