@@ -1,9 +1,7 @@
 ## Run batches of R scripts to build StrathE2EPolar West Greenland model
 rm(list = ls()) #reset
 
-library(tidyverse)
 library(MiMeMo.tools)
-library(tictoc)
 source("./R Scripts/regionFileWG.R")
 
 message(paste0("Forcing: ",Force, "\nSSP: ",ssp))

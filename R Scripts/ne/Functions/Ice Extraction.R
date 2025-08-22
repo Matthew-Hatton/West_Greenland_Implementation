@@ -74,8 +74,10 @@ get_icemod <- function(path, file, scheme_result, start = c(1,1,1,1), count = c(
     Snow_Thickness = c(nc_Sthick[ice_scheme$n]),
     Ice_pres = c(nc_simsk[ice_scheme$n])) %>% 
     as.data.frame() %>% 
-    cbind(.,scheme_result)
-  if (plot_save = TRUE) {
+    cbind(.,scheme_result) %>% 
+    mutate(Forcing = forcing,
+           SSP = SSP)
+  if (plot_save == TRUE) {
     # Make the rough plots for export
     ggplot() +
       geom_raster(data = all,aes(x = x,y = y,fill = Ice_Thickness)) +

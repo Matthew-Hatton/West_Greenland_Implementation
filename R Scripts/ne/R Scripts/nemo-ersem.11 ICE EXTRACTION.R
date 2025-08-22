@@ -3,17 +3,17 @@ rm(list = ls())
 
 packages <- c("tidyverse", "nemoRsem", "furrr", "ncdf4","tictoc")                                 # List packages
 lapply(packages, library, character.only = TRUE)                            # Load packages
-source("./Objects/@_Region file.R") 
+source("./R Scripts/regionFileWG.R") 
 source("./R Scripts/ne/Functions/Ice Extraction.R")
 sf_use_s2(F)
 
-plan(multisession)
+plan(multisession,workers = availableCores() - 2)
 
 
-domains <- readRDS("./Objects/Domains.rds") %>%                             # Load SF polygons of the MiMeMo model domains
+domains <- readRDS("./Objects/domain/domainWG.rds") %>%                             # Load SF polygons of the MiMeMo model domains
   select(-c(Elevation, area))                                               # Drop unneeded data which would get included in new NM files
 
-crop <- readRDS("./Objects/Domains.rds") %>%  # Load SF polygons of the MiMeMo model domains
+crop <- readRDS("./Objects/domain/domainWG.rds") %>%  # Load SF polygons of the MiMeMo model domains
   st_transform(crs = 3035) %>% #convert to 3035 for buffer
   st_buffer(dist = 50000) %>%                                               # It needs to be a bit bigger for sampling flows at the domain boundary
   st_transform(crs = 4326) %>% #convert back incase it needs to be in 4326 for some
@@ -61,7 +61,7 @@ split_files <- all_files %>%
   split(.,f = seq(nrow(.)))
 
 split_files %>% 
-  # .[1:12] %>% 
+  # .[1:12] %>%
   future_map(.,~{
     # Extracting the path and file from the current split
     path <- unique(.x$Path)  # Assuming Path is the same for each group
@@ -72,6 +72,6 @@ split_files %>%
     month <- .x$Month
     # Call your get_icemod function
     get_icemod(path, file, scheme_result, start = start, count = count, ice_scheme = ice_scheme,
-               year = year, month = month, forcing = forcing,SSP = SSP)
+               year = year, month = month, forcing = forcing,SSP = SSP,out.dir = "../../Paper 3/Paper-3/Objects/Driving/Ice Extraction")
   },.progress = T)
 toc()
