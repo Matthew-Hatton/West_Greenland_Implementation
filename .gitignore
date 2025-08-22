@@ -7,5 +7,6 @@
 *Objects
 .Rproj.user
 *.RDataTmp
+*.RDataTmp1
 *Figures
 *StrathE2EPolar_Implementation
