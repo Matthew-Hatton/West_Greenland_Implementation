@@ -1,21 +1,16 @@
 rm(list = ls()) # reset
 
 library(StrathE2EPolar)
+library(furrr)
+library(purrr)
 
-# check models exist
-e2ep_ls() # all there
+n_runs <- availableCores() - 2
+plan(multisession,workers = n_runs)
 
-# model1 <- e2ep_read("Barents_Sea","2011-2019")
-model <- e2ep_read("West_Greenland.test","2011-2019")
+parallel_optimise <- function(){
+  model <- e2ep_read("West_Greenland.test","2011-2019")
+  opt_eco <- e2ep_optimize_eco(model,nyears = 50,n_iter = 1000,quiet = T,start_temperature = 1,cooling = 1)
+}
 
-opt_eco <- e2ep_optimize_eco(model,nyears = 50,n_iter = 1000,quiet = T,start_temperature = 1)
-saveRDS(opt_eco,"./Objects/Optimisation/WG.1000iterV2.RDS")
-# opt_fish <- e2ep_optimize_hr(model = model,nyears = 40,n_iter = 50)
-
-new_pref <- opt_eco[["new_parameter_data"]][["new_preference_matrix"]]
-new_uptake_mort <- opt_eco[["new_parameter_data"]][["new_uptake_mort_rate_parameters"]]
-new_microbiology <- opt_eco[["new_parameter_data"]][["new_microbiology_parameters"]]
-
-write.csv(new_pref,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_preference_matrix_new.csv")
-write.csv(new_uptake_mort,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_uptake_mort_rates_new.csv")
-write.csv(new_microbiology,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_microbiology_others_new.csv")
+opt_eco <- future_map(1:n_runs, ~ parallel_optimise(), .options = furrr_options(seed = TRUE))
+saveRDS(opt_eco,"./Objects/Optimisation/WG.1000iterV3_no_fishing_parallel.RDS")
