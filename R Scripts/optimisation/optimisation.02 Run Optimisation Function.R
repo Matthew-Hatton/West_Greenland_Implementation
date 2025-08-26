@@ -11,6 +11,7 @@ parallel_optimise <- function(seed){
   set.seed(seed)
   model <- e2ep_read("West_Greenland.test","2011-2019")
   opt_eco <- e2ep_optimize_eco(model,nyears = 50,n_iter = 1000,quiet = T,start_temperature = 1,cooling = 1)
+  return(opt_eco)
 }
 
 opt_eco <- future_map(1:n_runs, ~ parallel_optimise(.x))
