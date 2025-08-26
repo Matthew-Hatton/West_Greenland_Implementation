@@ -22,7 +22,7 @@ domains <- readRDS("./Objects/domain/domainWG.RDS") %>%
 
 #### Extract primary production ####
 
-series <- future_map(list.files("./Objects/target/remote sensing/CMEMS/PP_data/", full.names = TRUE, pattern = ".nc"), ~{
+series <- future_map(list.files("./Objects/target/remote sensing/PP_data/", full.names = TRUE, pattern = ".nc"), ~{
   
   data <- raster(.x)
   data[is.na(data)] <- 0
@@ -52,38 +52,38 @@ Mike <- mutate(series,
          Source = "Copernicus remote sensing data from OCEANCOLOUR_GLO_BGC_L4_MY_009_104") 
 
 write.csv(Mike, str_glue("./Objects/target/PP_target_{implementation}.csv"), row.names = FALSE)
-  
-#### Ectract Chl-a ####
-
-series <- future_map(list.files("../Objects/target/remote sensing/CMEMS/CHL_data/", full.names = TRUE, pattern = ".nc"), ~{
-
-  data <- raster(.x)
-  data[is.na(data)] <- 0
-  
-  PP <- mutate(domains, CHLa = exact_extract(data, domains, "median"),
-      Date = as.Date(str_sub(str_extract(.x, "[0-9]+"), start = 1, 8), format = "%Y%m%d")) %>%
-      st_drop_geometry()
-
-}, .progress = TRUE) %>%
-  data.table::rbindlist()
-
-ggplot(series) +
-  geom_line(aes(x=Date, y = CHLa))
-
-Mike <- mutate(series, 
-               Month = lubridate::month(Date),
-               Year = lubridate::year(Date)) %>%
-  group_by(Month, Year) %>%
-  summarise(median = median(CHLa, na.rm = TRUE)) %>% 
-  replace_na(list(median = 0)) %>%
-  summarise(lower_centile = quantile(median, 0.2),
-            upper_centile = quantile(median, 0.8),
-            median = median(median, na.rm = TRUE)) %>% 
-  mutate(Month = month.abb[Month],
-         Comments = str_glue("Copernicus remote sensing data from OCEANCOLOUR_GLO_BGC_L4_MY_009_104 for {implementation} 2010-2019"),
-         low_cent_value = 0.2,
-         upp_cent_value = 0.8,
-         Variable = "surface_chlorophyll",
-         Units = "mgm3")
-
-  write.csv(Mike, str_glue("./Objects/target/CHLa_target_{implementation}.csv"), row.names = FALSE)
+#   
+# #### Ectract Chl-a ####
+# 
+# series <- future_map(list.files("../Objects/target/remote sensing/CMEMS/CHL_data/", full.names = TRUE, pattern = ".nc"), ~{
+# 
+#   data <- raster(.x)
+#   data[is.na(data)] <- 0
+#   
+#   PP <- mutate(domains, CHLa = exact_extract(data, domains, "median"),
+#       Date = as.Date(str_sub(str_extract(.x, "[0-9]+"), start = 1, 8), format = "%Y%m%d")) %>%
+#       st_drop_geometry()
+# 
+# }, .progress = TRUE) %>%
+#   data.table::rbindlist()
+# 
+# ggplot(series) +
+#   geom_line(aes(x=Date, y = CHLa))
+# 
+# Mike <- mutate(series, 
+#                Month = lubridate::month(Date),
+#                Year = lubridate::year(Date)) %>%
+#   group_by(Month, Year) %>%
+#   summarise(median = median(CHLa, na.rm = TRUE)) %>% 
+#   replace_na(list(median = 0)) %>%
+#   summarise(lower_centile = quantile(median, 0.2),
+#             upper_centile = quantile(median, 0.8),
+#             median = median(median, na.rm = TRUE)) %>% 
+#   mutate(Month = month.abb[Month],
+#          Comments = str_glue("Copernicus remote sensing data from OCEANCOLOUR_GLO_BGC_L4_MY_009_104 for {implementation} 2010-2019"),
+#          low_cent_value = 0.2,
+#          upp_cent_value = 0.8,
+#          Variable = "surface_chlorophyll",
+#          Units = "mgm3")
+# 
+#   write.csv(Mike, str_glue("./Objects/target/CHLa_target_{implementation}.csv"), row.names = FALSE)
