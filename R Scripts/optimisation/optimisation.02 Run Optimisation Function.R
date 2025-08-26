@@ -8,8 +8,8 @@ e2ep_ls() # all there
 # model1 <- e2ep_read("Barents_Sea","2011-2019")
 model <- e2ep_read("West_Greenland.test","2011-2019")
 
-opt_eco <- e2ep_optimize_eco(model,nyears = 50,n_iter = 50,quiet = T,start_temperature = 1)
-saveRDS(opt_eco,"./Objects/Optimisation/WG.50iterTest.RDS")
+opt_eco <- e2ep_optimize_eco(model,nyears = 50,n_iter = 1000,quiet = T,start_temperature = 1)
+saveRDS(opt_eco,"./Objects/Optimisation/WG.1000iterV2.RDS")
 # opt_fish <- e2ep_optimize_hr(model = model,nyears = 40,n_iter = 50)
 
 new_pref <- opt_eco[["new_parameter_data"]][["new_preference_matrix"]]
