@@ -7,7 +7,7 @@ rm(list=ls())                                                               # Wi
 
 packages <- c("tidyverse", "sf", "furrr", "terra", "ncdf4", "data.table", "tictoc") # List packages
 lapply(packages, library, character.only = TRUE)                            # Load packages
-source("./Objects/@_Region file.R")                                       # Define project region 
+source("./R Scripts/regionFileWG.R")                                       # Define project region 
 sf_use_s2(FALSE)
 
 plan(multisession)                                                          # Choose the method to paralelise by with furrr
@@ -20,7 +20,7 @@ all_files <- list.files("I:/Science/MS-Marine/MA/Hindcast/rivers/", recursive = 
   mutate(Year = str_sub(Year, end = -4)) %>%                                    # Drop file extension to get number
   rename(File = "value")
 
-domains <- readRDS("./Objects/Domains.rds")                                  # Import domain polygon
+domains <- readRDS("./Objects/domain/domainWG.rds")                                  # Import domain polygon
 
 raw <- nc_open("I:/Science/MS-Marine/MA/Hindcast/rivers/domain_cfg_zps.closea.compressed.nc")
 
@@ -71,11 +71,11 @@ ggplot() +
    theme_minimal() +
    labs(caption = "Check domain overlaps point estimates of river runoff") 
 
-ggsave_map("./Figures/saltless/check.04.1.png", plot = last_plot())
+ggsave_map("./Figures/saltless/check.png", plot = last_plot())
 
 #### Create larger domain polygon ####
 
-domains <- readRDS("./Objects/Domains.rds") %>%                             # Import original domain polygon
+domains <- readRDS("./Objects/domain/domainWG.rds") %>%                             # Import original domain polygon
   st_transform(crs = 3035) %>% 
   st_make_valid() %>% 
   st_union() %>%                                                            # Join inshore and offshore zone
@@ -166,7 +166,7 @@ ggplot(data = rivers) +
        caption = "Did we generate a time series?") +
   NULL
 
-ggsave("./Figures/saltless/check.04.4.png", dpi = 500, width = 18, height = 10 , units = "cm", bg = "white")
+ggsave("./Figures/saltless/check2.png", dpi = 500, width = 18, height = 10 , units = "cm", bg = "white")
 
 ggplot(data = rivers) +
   geom_area(aes(x = Date, y = NH4), fill = "darkgreen") +
@@ -176,7 +176,7 @@ ggplot(data = rivers) +
        caption = "Did we generate a time series?") +
   NULL
 
-ggsave("./Figures/saltless/check.04.5.png", dpi = 500, width = 18, height = 10 , units = "cm", bg = "white")
+ggsave("./Figures/saltless/check3.png", dpi = 500, width = 18, height = 10 , units = "cm", bg = "white")
 
 ggplot(data = rivers) +
   geom_area(aes(x = Date, y = NO3), fill = "darkgreen") +
@@ -186,7 +186,7 @@ ggplot(data = rivers) +
        caption = "Did we generate a time series?") +
   NULL
 
-ggsave("./Figures/saltless/check.04.6.png", dpi = 500, width = 18, height = 10 , units = "cm", bg = "white")
+ggsave("./Figures/saltless/check4.png", dpi = 500, width = 18, height = 10 , units = "cm", bg = "white")
 
 
 # ##test##
