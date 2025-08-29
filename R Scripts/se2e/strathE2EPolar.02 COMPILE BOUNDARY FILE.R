@@ -7,9 +7,11 @@ Packages <- c("MiMeMo.tools", "exactextractr", "raster", "lubridate")       # Li
 lapply(Packages, library, character.only = TRUE)   
 source("./R Scripts/regionFileWG.R")
 
-Boundary_template <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.2/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Driving/chemistry_BS_2011-2019.csv")  # Read in example boundary drivers
-NH4_boundary <- readRDS("./Objects/rivers/NH4 River Concentrations.RDS")
-NO3_boundary <- readRDS("./Objects/rivers/NO3 River Concentrations.RDS")
+Boundary_template <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Driving/chemistry_BS_2011-2019.csv")  # Read in example boundary drivers
+NH4_boundary <- readRDS("./Objects/rivers/NH4 River Concentrations.RDS") %>% 
+  mutate(monthly_NH4 = monthly_NH4 * 100) # off by factors
+NO3_boundary <- readRDS("./Objects/rivers/NO3 River Concentrations.RDS") %>% 
+  mutate(monthly_no3 = monthly_no3 * 10) # off by factors
 
 ## Iterate over different time periods ##
 #### Last minute data manipulation ####
@@ -82,4 +84,4 @@ NO3_boundary <- readRDS("./Objects/rivers/NO3 River Concentrations.RDS")
                 SO_other_ammonia_flux = 0,
          ) 
        
-       write.csv(Boundary_new, file = paste0("C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland.",Force,".",ssp,"./2011-2019/Driving/chemistry_WG_2011-2019.csv"), row.names = F)
+       write.csv(Boundary_new, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.",Force,".",ssp,"/2011-2019/Driving/chemistry_WG_2011-2019.csv"), row.names = F)

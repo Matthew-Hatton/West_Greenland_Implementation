@@ -8,7 +8,7 @@ library(MiMeMo.tools)
 
 source("./R Scripts/regionFileWG.R")
 
-Physics_template <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.2/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Driving/physics_BS_2011-2019.csv") # Read in example Physical drivers
+Physics_template <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Driving/physics_BS_2011-2019.csv") # Read in example Physical drivers
 
 #### Last minute data manipulation ####
 
@@ -106,9 +106,7 @@ Physics_new <- mutate(Physics_template, SLight = My_light$Measured,
                       Upwelling = 0, # Nominal value   
                       ## log e transformed suspended particulate matter concentration in zones
                       SO_LogeSPM = log(filter(My_SPM, Shore == "Offshore")$SPM),
-                      SO_LogeSPM = Physics_template$SO_LogeSPM,
                       SI_LogeSPM = log(filter(My_SPM, Shore == "Inshore")$SPM),
-                      SI_LogeSPM = Physics_template$SI_LogeSPM,
                       ## Temperatures in volumes for each zone
                       SO_temp = filter(My_volumes, Compartment == "Offshore S")$Temperature_avg,
                       D_temp = filter(My_volumes, Compartment == "Offshore D")$Temperature_avg,
@@ -137,18 +135,10 @@ Physics_new <- mutate(Physics_template, SLight = My_light$Measured,
                       SI_IceThickness = filter(My_ice, Shore == "Inshore")$Ice_Thickness,
                       SO_SnowThickness = filter(My_ice, Shore == "Offshore")$Snow_Thickness,
                       SI_SnowThickness = filter(My_ice, Shore == "Inshore")$Snow_Thickness,
-                      # SO_IceFree = ifelse(1 - filter(My_ice, Shore == "Offshore")$Ice_Pres >  0.90,(1 - filter(My_ice, Shore == "Offshore")$Ice_Pres)-0.1,1 - filter(My_ice, Shore == "Offshore")$Ice_Pres),
-                      # SI_IceFree = ifelse(1 - filter(My_ice, Shore == "Offshore")$Ice_Pres >  0.90,(1 - filter(My_ice, Shore == "Inshore")$Ice_Pres)-0.1,1 - filter(My_ice, Shore == "Inshore")$Ice_Pres),
-                      # SO_IceCover = ifelse(filter(My_ice, Shore == "Offshore")$Ice_Conc <  0.10,(filter(My_ice, Shore == "Offshore")$Ice_Pres)+0.1,filter(My_ice, Shore == "Offshore")$Ice_Conc),
-                      # SI_IceCover = ifelse(filter(My_ice, Shore == "Inshore")$Ice_Conc <  0.10,(filter(My_ice, Shore == "Inshore")$Ice_Pres)+0.1,filter(My_ice, Shore == "Inshore")$Ice_Conc),
-                      # SO_IceThickness = ifelse(filter(My_ice, Shore == "Offshore")$Ice_Thickness <  0.10, filter(My_ice, Shore == "Offshore")$Ice_Thickness + 0.1, filter(My_ice, Shore == "Offshore")$Ice_Thickness),
-                      # SI_IceThickness = ifelse(filter(My_ice, Shore == "Inshore")$Ice_Thickness <  0.10, filter(My_ice, Shore == "Inshore")$Ice_Thickness + 0.1, filter(My_ice, Shore == "Inshore")$Ice_Thickness),
-                      # SO_SnowThickness = ifelse(filter(My_ice, Shore == "Offshore")$Snow_Thickness <  0.10, filter(My_ice, Shore == "Offshore")$Snow_Thickness + 0.1, filter(My_ice, Shore == "Offshore")$Snow_Thickness),
-                      # SI_SnowThickness = ifelse(filter(My_ice, Shore == "Inshore")$Snow_Thickness <  0.10, filter(My_ice, Shore == "Inshore")$Snow_Thickness + 0.1, filter(My_ice, Shore == "Inshore")$Snow_Thickness),
                       SO_AirTemp = Physics_template$SO_AirTemp,
                       SI_AirTemp = Physics_template$SI_AirTemp
                       # SO_AirTemp = filter(My_AirTemp, Shore == "Offshore")$Measured,
                       # SI_AirTemp = filter(My_AirTemp, Shore == "Inshore")$Measured
                       )
 
-write.csv(Physics_new, file = paste0("C:/Users/psb22188/AppData/Local/Programs/R/R-4.3.1/library/StrathE2EPolar/extdata/Models/West_Greenland.",Force,".",ssp,"./2011-2019/Driving/physics_WG_2011-2019.csv"), row.names = F)
+write.csv(Physics_new, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.",Force,".",ssp,"./2011-2019/Driving/physics_WG_2011-2019.csv"), row.names = F)
