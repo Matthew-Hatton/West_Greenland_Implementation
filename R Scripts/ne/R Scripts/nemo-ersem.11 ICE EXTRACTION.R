@@ -22,7 +22,7 @@ crop <- readRDS("./Objects/domain/domainWG.rds") %>%  # Load SF polygons of the 
 
 Bathymetry <- readRDS("./Objects/domain/NE_grid.rds") %>%                          # Import NEMO-ERSEM bathymetry
   st_drop_geometry() %>%                                                    # Drop sf geometry column 
-  select(-c("x", "y"), latitude = Latitude, longitude = Longitude)          # Clean column so the bathymetry is joined by lat/lon
+  dplyr::select(-c("x", "y"), latitude = Latitude, longitude = Longitude)          # Clean column so the bathymetry is joined by lat/lon
 
 #load example file
 space <- get_spatial_1D("I:/Science/MS-Marine/MA/CNRM_ssp370/ice/CNRM_ssp370_1m_20701201_20701231_icemod_207012-207012.nc")
