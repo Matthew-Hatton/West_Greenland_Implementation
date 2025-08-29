@@ -1,4 +1,4 @@
-# rm(list = ls()) # reset
+rm(list = ls()) # reset
 
 library(StrathE2EPolar)
 library(furrr)
@@ -18,7 +18,9 @@ parallel_optimise <- function(){
 
 opt_eco <- future_map(1:n_runs, ~ parallel_optimise(),.progress = F)
 # saveRDS(opt_eco,"./Objects/Optimisation/WG.1000iterV3_no_fishing_parallel.RDS")
-saveRDS(opt_eco,"./Objects/Optimisation/WG.1000ADDITIONALiter.RDS")
+saveRDS(opt_eco,"./Objects/Optimisation/WG.500ADDITIONALV4iter.RDS")
 
 future:::ClusterRegistry("stop") # make sure all additional clusters are closed
 toc()
+
+## 2.17s per optimisation year per iteration
