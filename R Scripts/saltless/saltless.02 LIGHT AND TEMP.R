@@ -5,7 +5,7 @@ rm(list=ls())                                                               # Wi
 
 packages <- c("MiMeMo.tools", "furrr")                                      # List packages
 lapply(packages, library, character.only = TRUE)                            # Load packages
-source("./Objects/@_Region file.R")                                       # Define project region 
+source("./R Scripts/regionFileWG.R")                                       # Define project region 
 sf_use_s2(F)
 
 plan(multisession)                                                          # Choose the method to parallelise by with furrr
