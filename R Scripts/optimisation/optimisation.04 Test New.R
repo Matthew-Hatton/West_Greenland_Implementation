@@ -6,11 +6,11 @@ library(ggplot2)
 model <- e2ep_read("West_Greenland.test","2011-2019")
 res <- e2ep_run(model,nyears = 50)
 
-jpeg("./Figures/Optimisation/v3/Biomass Attempt v3.jpeg")
+jpeg("./Figures/Optimisation/v3/Biomass Attempt v4.jpeg")
 e2ep_plot_biomass(model,results = res)
 dev.off()
 
-jpeg("./Figures/Optimisation/v3/Time Series Attempt v3.jpeg",units = "px",width = 1920,height = 1080)
+jpeg("./Figures/Optimisation/v3/Time Series Attempt v4.jpeg",units = "px",width = 1920,height = 1080)
 e2ep_plot_ts(model,results = res)
 dev.off()
 
