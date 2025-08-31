@@ -6,12 +6,16 @@ library(ggplot2)
 model <- e2ep_read("West_Greenland.test","2011-2019")
 res <- e2ep_run(model,nyears = 50)
 
-jpeg("./Figures/Optimisation/v3/Biomass Attempt v4.jpeg")
+jpeg("./Figures/Optimisation/v3/Biomass Attempt v5.jpeg")
 e2ep_plot_biomass(model,results = res)
 dev.off()
 
-jpeg("./Figures/Optimisation/v3/Time Series Attempt v4.jpeg",units = "px",width = 1920,height = 1080)
+jpeg("./Figures/Optimisation/v3/Time Series Attempt v5.jpeg",units = "px",width = 1920,height = 1080)
 e2ep_plot_ts(model,results = res)
+dev.off()
+
+jpeg("./Figures/Optimisation/v3/Compare_Obs Attempt v5.jpeg",units = "px",width = 1920,height = 1080)
+e2ep_compare_obs(model = model,results = res,selection = "ANNUAL",)
 dev.off()
 
 # ycurve_D <- e2ep_run_ycurve(model = model,nyears = 50,c(0,1,2,3,4),selection = "DEMERSAL")
