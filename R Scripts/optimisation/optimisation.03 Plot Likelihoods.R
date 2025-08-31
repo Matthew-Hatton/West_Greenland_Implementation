@@ -129,11 +129,50 @@ plt3 <- ggplot() +
 ggsave(plot = plt3,"./Figures/Optimisation/Attempt 4/TrajectoriesV4ALL.png")
 
 message(paste0("The highest likelihood was in Model: ", (likelihoods_28s %>% filter(Iteration == 2500) %>% arrange(-Accepted))$Model[1]))
+# 
+# # ##lets look at model 22 (for the second time):
+# new_pref <- l_V4[[22]][["new_parameter_data"]][["new_preference_matrix"]]
+# new_uptake_mort <- l_V4[[22]][["new_parameter_data"]][["new_uptake_mort_rate_parameters"]]
+# new_microbiology <- l_V4[[22]][["new_parameter_data"]][["new_microbiology_parameters"]]
+# #
+# write.csv(new_pref,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_preference_matrix_new.csv")
+# write.csv(new_uptake_mort,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_uptake_mort_rates_new.csv")
+# write.csv(new_microbiology,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_microbiology_others_new.csv")
 
-# ##lets look at model 22 (for the second time):
-new_pref <- l_V4[[22]][["new_parameter_data"]][["new_preference_matrix"]]
-new_uptake_mort <- l_V4[[22]][["new_parameter_data"]][["new_uptake_mort_rate_parameters"]]
-new_microbiology <- l_V4[[22]][["new_parameter_data"]][["new_microbiology_parameters"]]
+## Add Model 22V2 in
+l_V5 <- readRDS("./Objects/Optimisation/WG.500ADDITIONALV5iter.RDS")
+likelihoods_V5s <- data.frame(Accepted = numeric(),
+                              Model = character(),
+                              Iteration = numeric(),
+                              Marker = character())
+for (i in 1:30) {
+  tmp <- data.frame(Accepted = l_V5[[i]][["parameter_accepted_history"]][["annual_obj"]],
+                    Model = i,
+                    Iteration =  2500 + seq(1,500),
+                    Marker = "Fifth")
+  likelihoods_V5s <- rbind(likelihoods_V5s,tmp)
+}
+
+lks_prev <- rbind(likelihoods,likelihoods_18s,likelihoods_22s,likelihoods_28s)
+
+plt3 <- ggplot() +
+  geom_line(data = lks_prev,
+            aes(x = Iteration,y = Accepted,group = Model),linewidth = 0.1) +
+  geom_line(data = likelihoods_V5s,aes(x = Iteration,y = Accepted,group = Model),linewidth = 0.1) +
+  labs(color = "") +
+  geom_vline(xintercept = 1000,linewidth = 0.2,linetype = "dashed") +
+  geom_vline(xintercept = 1500,linewidth = 0.2,linetype = "dashed") +
+  geom_vline(xintercept = 2000,linewidth = 0.2,linetype = "dashed") +
+  geom_vline(xintercept = 2500,linewidth = 0.2,linetype = "dashed") +
+  NULL
+ggsave(plot = plt3,"./Figures/Optimisation/Attempt 4/TrajectoriesV5ALL.png",width = 1920,height = 1080,units = "px")
+
+message(paste0("The highest likelihood was in Model: ", (likelihoods_V5s %>% filter(Iteration == 3000) %>% arrange(-Accepted))$Model[1]))
+# 
+## lets look at model 2:
+new_pref <- l_V5[[2]][["new_parameter_data"]][["new_preference_matrix"]]
+new_uptake_mort <- l_V5[[2]][["new_parameter_data"]][["new_uptake_mort_rate_parameters"]]
+new_microbiology <- l_V5[[2]][["new_parameter_data"]][["new_microbiology_parameters"]]
 #
 write.csv(new_pref,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_preference_matrix_new.csv")
 write.csv(new_uptake_mort,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_uptake_mort_rates_new.csv")
