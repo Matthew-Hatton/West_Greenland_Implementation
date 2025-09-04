@@ -1,6 +1,8 @@
-## This final one shows that multiplying the uptake rate of phytoplankton and pinnipeds by 2 allows everything to stay alive
+## Multiplying the uptake rate of phytoplankton and pinnipeds by 2 allows everything to stay alive whilst minimising the decrease in nutrients
 ## I will relaunch the fitting process with that in mind.
 ## Let's change that here.
+## After this, the user should relaunch the fitting process in script:
+## "optimisation.02 Run Optimisation Function.r"
 
 uptakes <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_uptake_mort_rates_new.csv")
 uptakes$Numax[uptakes$consumer == "phyt_s"] <- uptakes$Numax[uptakes$consumer == "phyt_s"] * 2
