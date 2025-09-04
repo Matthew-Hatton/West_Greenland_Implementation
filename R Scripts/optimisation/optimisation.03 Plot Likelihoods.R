@@ -20,7 +20,7 @@ plt <- ggplot() +
   # ggrepel::geom_label_repel(data = subset(likelihoods, Iteration == 1000), 
                             # aes(x = Iteration, y = Accepted, label = Model),max.overlaps = 100) +
   NULL
-ggsave(plot = plt,"./Figures/Optimisation/Attempt 4/Trajectories.png")
+ggsave(plot = plt,"./Figures/Optimisation/Trajectories/Trajectories.png")
 
 ## Model 18 is the one that seems to be leading somewhere, so let's write those parameter files
 # new_pref <- opt_eco[[18]][["new_parameter_data"]][["new_preference_matrix"]]
@@ -88,7 +88,7 @@ plt2 <- ggplot() +
   geom_vline(xintercept = 1000,linewidth = 0.2,linetype = "dashed") +
   geom_vline(xintercept = 1500,linewidth = 0.2,linetype = "dashed") +
   NULL
-ggsave(plot = plt2,"./Figures/Optimisation/Attempt 4/TrajectoriesV3ALL.png")
+ggsave(plot = plt2,"./Figures/Optimisation/Trajectories/TrajectoriesV3ALL.png")
 
 message(paste0("The highest likelihood was in Model: ", (likelihoods_22s %>% filter(Iteration == 2000) %>% arrange(-Accepted))$Model[1]))
 
@@ -126,7 +126,7 @@ plt3 <- ggplot() +
   geom_vline(xintercept = 1500,linewidth = 0.2,linetype = "dashed") +
   geom_vline(xintercept = 1500,linewidth = 0.2,linetype = "dashed") +
   NULL
-ggsave(plot = plt3,"./Figures/Optimisation/Attempt 4/TrajectoriesV4ALL.png")
+ggsave(plot = plt3,"./Figures/Optimisation/Trajectories/TrajectoriesV4ALL.png")
 
 message(paste0("The highest likelihood was in Model: ", (likelihoods_28s %>% filter(Iteration == 2500) %>% arrange(-Accepted))$Model[1]))
 # 
@@ -165,7 +165,7 @@ plt4 <- ggplot() +
   geom_vline(xintercept = 2000,linewidth = 0.2,linetype = "dashed") +
   geom_vline(xintercept = 2500,linewidth = 0.2,linetype = "dashed") +
   NULL
-ggsave(plot = plt4,"./Figures/Optimisation/Attempt 4/TrajectoriesV5ALL.png",width = 1920,height = 1080,units = "px")
+ggsave(plot = plt4,"./Figures/Optimisation/Trajectories/TrajectoriesV5ALL.png",width = 1920,height = 1080,units = "px")
 
 message(paste0("The highest likelihood was in Model: ", (likelihoods_V5s %>% filter(Iteration == 3000) %>% arrange(-Accepted))$Model[1]))
 # 
@@ -204,7 +204,7 @@ plt5 <- ggplot() +
   geom_vline(xintercept = 2500,linewidth = 0.2,linetype = "dashed") +
   geom_vline(xintercept = 3000,linewidth = 0.2,linetype = "dashed") +
   NULL
-ggsave(plot = plt5,"./Figures/Optimisation/Attempt 4/TrajectoriesV6ALL.png",width = 1920,height = 1080,units = "px")
+ggsave(plot = plt5,"./Figures/Optimisation/Trajectories/TrajectoriesV6ALL.png",width = 1920,height = 1080,units = "px")
 
 message(paste0("The highest likelihood was in Model: ", (likelihoods_V6s %>% filter(Iteration == 3500) %>% arrange(-Accepted))$Model[1]))
 # 
@@ -244,18 +244,18 @@ plt6 <- ggplot() +
   geom_vline(xintercept = 3000,linewidth = 0.2,linetype = "dashed") +
   geom_vline(xintercept = 3500,linewidth = 0.2,linetype = "dashed") +
   NULL
-ggsave(plot = plt6,"./Figures/Optimisation/Attempt 4/Trajectoriesv7ALL.png",width = 1920,height = 1080,units = "px")
+ggsave(plot = plt6,"./Figures/Optimisation/Trajectories/Trajectoriesv7ALL.png",width = 1920,height = 1080,units = "px")
 
 message(paste0("The highest likelihood was in Model: ", (likelihoods_v7s %>% filter(Iteration == 4000) %>% arrange(-Accepted))$Model[1]))
 # 
 ## lets look at model 8:
-new_pref <- l_v7[[8]][["new_parameter_data"]][["new_preference_matrix"]]
-new_uptake_mort <- l_v7[[8]][["new_parameter_data"]][["new_uptake_mort_rate_parameters"]]
-new_microbiology <- l_v7[[8]][["new_parameter_data"]][["new_microbiology_parameters"]]
+# new_pref <- l_v7[[8]][["new_parameter_data"]][["new_preference_matrix"]]
+# new_uptake_mort <- l_v7[[8]][["new_parameter_data"]][["new_uptake_mort_rate_parameters"]]
+# new_microbiology <- l_v7[[8]][["new_parameter_data"]][["new_microbiology_parameters"]]
 #
-write.csv(new_pref,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_preference_matrix_new.csv")
-write.csv(new_uptake_mort,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_uptake_mort_rates_new.csv")
-write.csv(new_microbiology,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_microbiology_others_new.csv")
+# write.csv(new_pref,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_preference_matrix_new.csv")
+# write.csv(new_uptake_mort,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_uptake_mort_rates_new.csv")
+# write.csv(new_microbiology,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_microbiology_others_new.csv")
 
 ### l_v8 MADE THINGS WORSE, GO BACK ###
 
@@ -295,6 +295,47 @@ write.csv(new_microbiology,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/St
 # new_pref <- l_v8[[2]][["new_parameter_data"]][["new_preference_matrix"]]
 # new_uptake_mort <- l_v8[[2]][["new_parameter_data"]][["new_uptake_mort_rate_parameters"]]
 # new_microbiology <- l_v8[[2]][["new_parameter_data"]][["new_microbiology_parameters"]]
+# #
+# write.csv(new_pref,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_preference_matrix_new.csv")
+# write.csv(new_uptake_mort,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_uptake_mort_rates_new.csv")
+# write.csv(new_microbiology,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_microbiology_others_new.csv")
+
+l_v9 <- readRDS(,"./Objects/Optimisation/WG.500ADDITIONALV9_INCREASE_PHYT_PIN_MAX_UP_RATE.RDS")
+likelihoods_v9s <- data.frame(Accepted = numeric(),
+                              Model = character(),
+                              Iteration = numeric(),
+                              Marker = character())
+for (i in 1:30) {
+  tmp <- data.frame(Accepted = l_v9[[i]][["parameter_accepted_history"]][["annual_obj"]],
+                    Model = i,
+                    Iteration =  4000 + seq(1,500), # same as v8 because of backtrack
+                    Marker = "Ninth")
+  likelihoods_v9s <- rbind(likelihoods_v9s,tmp)
+}
+
+lks_prev <- rbind(likelihoods,likelihoods_18s,likelihoods_22s,likelihoods_28s,likelihoods_V5s,likelihoods_V6s,likelihoods_v7s)
+
+plt9 <- ggplot() +
+  geom_line(data = lks_prev,
+            aes(x = Iteration,y = Accepted,group = Model),linewidth = 0.1) +
+  geom_line(data = likelihoods_v9s,aes(x = Iteration,y = Accepted,group = Model),linewidth = 0.1) +
+  labs(color = "") +
+  geom_vline(xintercept = 1000,linewidth = 0.2,linetype = "dashed") +
+  geom_vline(xintercept = 1500,linewidth = 0.2,linetype = "dashed") +
+  geom_vline(xintercept = 2000,linewidth = 0.2,linetype = "dashed") +
+  geom_vline(xintercept = 2500,linewidth = 0.2,linetype = "dashed") +
+  geom_vline(xintercept = 3000,linewidth = 0.2,linetype = "dashed") +
+  geom_vline(xintercept = 3500,linewidth = 0.2,linetype = "dashed") +
+  geom_vline(xintercept = 4000,linewidth = 0.2,linetype = "dashed") +
+  NULL
+ggsave(plot = plt9,"./Figures/Optimisation/Trajectories/Trajectoriesv9ALL.png",width = 1920,height = 1080,units = "px")
+
+message(paste0("The highest likelihood was in Model: ", (likelihoods_v9s %>% filter(Iteration == 4500) %>% arrange(-Accepted))$Model[1]))
+#
+# # lets look at model X:
+# new_pref <- l_v9[[X]][["new_parameter_data"]][["new_preference_matrix"]]
+# new_uptake_mort <- l_v9[[X]][["new_parameter_data"]][["new_uptake_mort_rate_parameters"]]
+# new_microbiology <- l_v9[[X]][["new_parameter_data"]][["new_microbiology_parameters"]]
 # #
 # write.csv(new_pref,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_preference_matrix_new.csv")
 # write.csv(new_uptake_mort,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland.test/2011-2019/Param/fitted_uptake_mort_rates_new.csv")
