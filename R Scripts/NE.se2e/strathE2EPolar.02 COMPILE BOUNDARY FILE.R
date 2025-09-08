@@ -9,9 +9,9 @@ source("./R Scripts/regionFileWG.R")
 
 Boundary_template <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Driving/chemistry_BS_2011-2019.csv")  # Read in example boundary drivers
 NH4_boundary <- readRDS("./Objects/rivers/NH4 River Concentrations.RDS") %>% 
-  mutate(monthly_NH4 = monthly_NH4 * 100) # off by factors
+  mutate(monthly_NH4 = monthly_NH4*(1/14.006720)*1e3) # Convert mg/l to mmol/m^3
 NO3_boundary <- readRDS("./Objects/rivers/NO3 River Concentrations.RDS") %>% 
-  mutate(monthly_no3 = monthly_no3 * 10) # off by factors
+  mutate(monthly_no3 = monthly_no3*(1/14.006720)*1e3) # Convert mg/l to mmol/m^3
 
 ## Iterate over different time periods ##
 #### Last minute data manipulation ####

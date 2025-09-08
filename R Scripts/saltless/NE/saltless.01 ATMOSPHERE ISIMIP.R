@@ -7,9 +7,9 @@ rm(list=ls())
 
 Packages <- c("MiMeMo.tools", "exactextractr", "raster", "lubridate")       # List packages
 lapply(Packages, library, character.only = TRUE)                            # Load packages
-source("./Objects/@_Region file.R")
+source("./R Scripts/regionFileWG.R")
 
-domains <- readRDS("./Objects/Domains.rds") %>%                             # Import inshore polygon
+domains <- readRDS("./Objects/domain/domainWG.rds") %>%                             # Import inshore polygon
   st_transform(crs = 4326)
 
 Reduced <- brick("./Shared data/ISIMIP Atmosphere/ndep-nhx_histsoc_monthly_1901_2021.nc") # import reduced nitrogen deposition

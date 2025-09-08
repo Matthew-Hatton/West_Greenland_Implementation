@@ -70,7 +70,7 @@ My_SPM <- readRDS("./Objects/physics/Suspended particulate matter.rds") %>%
   ungroup() %>%
   arrange(Month)                                                            # Order by month to match template
 
-My_Rivers <- readRDS("./Objects/rivers/NE River input.rds") %>%
+My_Rivers <- readRDS("./Objects/rivers/NE/NE River input.rds") %>%
   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
   mutate(Month = as.integer(format(.$Date, "%m"))) %>% # convert to month
   group_by(Month) %>%

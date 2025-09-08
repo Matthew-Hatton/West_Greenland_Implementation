@@ -125,6 +125,3 @@ NO3_WG_df <- data.frame(Month = seq(1,12),
 ggplot() + geom_line(data = NO3_WG_df,aes(x = Month,y = NO3),color = "darkgreen") +
   scale_x_continuous(labels = seq(1,12),breaks = seq(1,12)) + 
   labs(y = "Mean NO3 per meter cubed")
-
-## Fix of this found in XX file. I give up. I have just taken the levels from AGRO and going to use those
-## They represent the seasonal pattern you would expect.

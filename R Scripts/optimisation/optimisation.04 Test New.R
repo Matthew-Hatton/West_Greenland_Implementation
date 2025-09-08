@@ -6,20 +6,20 @@ library(ggplot2)
 model <- e2ep_read("West_Greenland.test","2011-2019")
 res <- e2ep_run(model,nyears = 50)
 
-jpeg("./Figures/Optimisation/v3/Biomass Attempt v8.jpeg")
+jpeg("./Figures/Optimisation/Diagnostic Plots/Biomass Attempt v11.jpeg")
 e2ep_plot_biomass(model,results = res)
 dev.off()
 
-jpeg("./Figures/Optimisation/v3/Time Series Attempt v8.jpeg",units = "px",width = 1920,height = 1080)
+jpeg("./Figures/Optimisation/Diagnostic Plots/Time Series Attempt v11.jpeg",units = "px",width = 1920,height = 1080)
 e2ep_plot_ts(model,results = res)
 dev.off()
 
-jpeg("./Figures/Optimisation/v3/Compare_Obs Attempt v8.jpeg",units = "px",width = 1920,height = 1080)
+jpeg("./Figures/Optimisation/Diagnostic Plots/Compare_Obs Attempt v11.jpeg",units = "px",width = 1920,height = 1080)
 e2ep_compare_obs(model = model,results = res,selection = "ANNUAL",)
 dev.off()
 
-jpeg("./Figures/Optimisation/v3/opt_diagnostics Attempt v8.jpeg",units = "cm",height = 30,width = 20,res = 300)
-e2ep_plot_opt_diagnostics(model = model,results = opt_eco[[2]],selection = "ECO")
+jpeg("./Figures/Optimisation/Diagnostic Plots/opt_diagnostics Attempt v10.jpeg",units = "cm",height = 30,width = 20,res = 300)
+e2ep_plot_opt_diagnostics(model = model,results = opt_eco[[28]],selection = "ECO")
 dev.off()
 
 
