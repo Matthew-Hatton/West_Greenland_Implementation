@@ -1,3 +1,7 @@
+## Script runs simulated annealing process in parallel for different rounds.
+## Each round takes the previous rounds highest likelihood and continues running.
+## Simulation time can be very long.
+
 rm(list = ls()) # reset
 
 library(StrathE2EPolar)
@@ -12,8 +16,8 @@ future:::ClusterRegistry("stop") # make sure all additional clusters are closed
 tic()
 ## Initialise ##
 n_runs <- availableCores() - 2
-n_iter <- 300
-rounds <- seq(1,2)
+n_iter <- 250
+rounds <- seq(1,3)
 n_years <- 40
 ## ########## ##
 
@@ -61,12 +65,12 @@ for (round in rounds) {
                 aes(x = Iteration,y = Accepted,group = Model),linewidth = 0.1) +
       geom_line(data = likelihood,aes(x = Iteration,y = Accepted,group = Model),linewidth = 0.1) +
       NULL
-    ggsave(plot = plt,paste0("./Figures/optimisation/NM/Trajectories.Round.",round,".png"),width = 1920,height = 1080,units = "px")
+    ggsave(plot = plt,paste0("./Figures/optimisation/NM/Trajectories/Trajectories.Round.",round,".png"),width = 1920,height = 1080,units = "px")
   } else{
     plt <- ggplot() +
       geom_line(data = likelihood,aes(x = Iteration,y = Accepted,group = Model),linewidth = 0.1) +
       NULL
-    ggsave(plot = plt,paste0("./Figures/optimisation/NM/Trajectories.Round.",round,".png"),width = 1920,height = 1080,units = "px")
+    ggsave(plot = plt,paste0("./Figures/optimisation/NM/Trajectories/Trajectories.Round.",round,".png"),width = 1920,height = 1080,units = "px")
   }
   
   
@@ -82,6 +86,26 @@ for (round in rounds) {
   write.csv(new_uptake_mort,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Param/fitted_uptake_mort_rates_new.csv")
   write.csv(new_microbiology,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Param/fitted_microbiology_others_new.csv")
   
+  ## Check Diagnostics
+  model <- e2ep_read("West_Greenland",
+                     "2011-2019")
+  results <- e2ep_run(model,nyears = 50)
+  
+  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/Biomass.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
+  e2ep_plot_biomass(model,results = results)
+  dev.off()
+  
+  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/TS.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
+  e2ep_plot_ts(model,results = results)
+  dev.off()
+  
+  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/CompareObs.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
+  e2ep_compare_obs(model = model,results = results,selection = "ANNUAL",)
+  dev.off()
+  
+  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/OptDiagnostics.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
+  e2ep_plot_opt_diagnostics(model = model,results = opt_eco[[largest]],selection = "ECO")
+  dev.off()
 }
 
 future:::ClusterRegistry("stop") # make sure all additional clusters are closed
