@@ -1,4 +1,4 @@
-
+# 2015-2017 files corrupt, so removed from dataset
 #### Set up ####
 
 rm(list=ls())                                                               # Wipe the brain
@@ -7,9 +7,10 @@ packages <- c("tidyverse", "sf", "tictoc", "furrr", "ncdf4", "stars")       # Li
 lapply(packages, library, character.only = TRUE)                            # Load packages
 source("./R scripts/regionFileWG.R")                                       # Define project region 
 
-plan(multiprocess,workers = availableCores() - 2)                                                          # Choose the method to parallelise by with furrr
+plan(multisession,workers = availableCores() - 2)                                                          # Choose the method to parallelise by with furrr
+sf_use_s2(FALSE)
 
-all_files <- list.files("./Objects/Shared Data/EMEP Atmosphere/", recursive = TRUE, full.names = TRUE, pattern = ".nc") %>%
+all_files <- list.files("./Objects/Shared Data/EMEP Atmosphere/EMEP Atmosphere/", recursive = TRUE, full.names = TRUE, pattern = ".nc") %>%
   as_tibble() %>%                                                           # Turn the vector into a dataframe/tibble
   separate(value, into = c(NA, "Year"), 
            remove = FALSE, sep = "month.") %>%                              # Extract the year from the file name
@@ -47,7 +48,10 @@ mync_get <- function(File, Variable)                {
 }    # Import a variable clipped to Window
 
 get_air_deposition <- function(File, Year)          {
-  
+  ##
+  File = all_files$File[1]
+  Year = all_files$Year[1]
+  ##
   #File <- all_files$File[1] ; Year <- all_files$Year[1]                     # test
   variables <- c("DDEP_OXN_m2Grid", "WDEP_OXN", "DDEP_RDN_m2Grid", "WDEP_RDN")
   
@@ -63,7 +67,7 @@ get_air_deposition <- function(File, Year)          {
                                   each = length(Space$Lons)), times = 12), times = length(variables)),
            Month = rep(rep(1:12, each = length(Space$Lats) * length(Space$Lons)), times = length(variables))) %>% 
     left_join(domains_mask) %>%                                              # Crop to domain
-    drop_na() %>%         
+    # drop_na() %>%         
     mutate(Year = Year,
            Oxidation_state = ifelse(grepl(pattern = "OXN", x = Variable, fixed = T), "O", "R"), 
            Deposition_state = ifelse(grepl(pattern = "DDEP", x = Variable, fixed = T), "Dry", "Wet")) %>% 
@@ -79,23 +83,24 @@ get_air_deposition <- function(File, Year)          {
 Space <- Window_emep(all_files[1,]$File, w = 0, e = 76, s = 65, n = 84)     # Get values to crop a netcdf file spatially at import. 
 
 domains <- readRDS("./Objects/domain/domainWG.rds") %>%                             # Load SF polygons of the MiMeMo model domains
-  st_transform(crs = 4326)
+  st_transform(crs = 4326) %>% 
+  st_cast("POLYGON",do_split = F)
 
 areas <- expand.grid(Longitude = Space$Lons, Latitude = Space$Lats) %>%     # Get the data grid
   mutate(Dummy = 10) %>%                                                    # Add dummy data to convert to a stars grid
   st_as_stars()
 st_crs(areas) <- st_crs(4326)                                               # set lat-lon crs
 
-areas <- st_as_sf(areas, as_points = F, merge = F) %>%                      # Convert the stars grid into SF polygons 
-  st_join(domains) %>%                                                      # Link to model domain 
-  drop_na() %>%                                                             # Crop
-  select(-c(Elevation, area, Dummy)) %>%                                    # Drop uneeded information
+areas <- st_as_sf(areas, as_points = F, merge = F) %>%                      # Convert the stars grid into SF polygons
+  st_join(domains) %>%                                                      # Link to model domain
+  # drop_na() %>%                                                             # Crop
+  dplyr::select(-c(Elevation, area, Dummy)) %>%                                    # Drop uneeded information
   mutate(weights = as.numeric(st_area(.)))                                  # Calculate the area of each cell for weighted averages
 
 domains_mask <- expand.grid(Longitude = Space$Lons, Latitude = Space$Lats) %>% # Get the data grid
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326, remove = F) %>% # Convert to SF
   st_join(areas) %>%                                                        # Add the areas for weighting
-  drop_na() %>%                                                             # Drop points which we didn't calculate weights for
+  # drop_na() %>%                                                             # Drop points which we didn't calculate weights for
   st_drop_geometry()                                                        # Drop SF formatting
 
 #### Extract nitrogen depositons ####
@@ -110,7 +115,7 @@ Deposition <- future_pmap_dfr(all_files, get_air_deposition, .progress = T) %>% 
          Leap_year = leap(as.numeric(Year)),                                       # Which years are leap years?
          Days = ifelse(Leap_year == TRUE & Month == 2, 29, Days)) %>%              # Correct length of February in a leap year
   mutate(Measured = Measured / Days)   %>%                                         # Scale to average daily deposition  
-  select(-c(Days, Leap_year))
+  dplyr::select(-c(Days, Leap_year))
 saveRDS(Deposition, "./Objects/misc/NM.Atmospheric N deposition.rds")
 toc()
 
@@ -127,6 +132,6 @@ ggplot(data = Deposition) +
   theme(legend.position = "top") +
   NULL
 
-ggsave("./Figures/saltless/Atmospheric N Deposition.png", last_plot(), dpi = 500, width = 18, height = 10 , units = "cm")
+ggsave("./Figures/saltless/NM/NM.Atmospheric N Deposition.png", last_plot(), dpi = 500, width = 18, height = 10 , units = "cm")
 
 

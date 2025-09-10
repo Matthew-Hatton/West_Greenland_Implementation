@@ -59,32 +59,28 @@ My_Waves <- readRDS("./Objects/physics/Significant wave height.rds") %>%  #*2000
   group_by(month) %>% 
   summarise(mean_height = mean(mean_height))# Arrange to match template  
 
-## ?? ##
-
-## just use NE for now ##
-My_Rivers <- readRDS("./Objects/rivers/NE/NE River input.rds") %>%
+My_Rivers <- readRDS("./Objects/rivers/NM/NM.River volume input.rds") %>%
   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
-  mutate(Month = as.integer(format(.$Date, "%m"))) %>% # convert to month
   group_by(Month) %>%
   summarise(Runoff = mean(Runoff, na.rm = T)) %>%                           # Average by month across years
   ungroup() %>%
-  arrange(as.numeric(Month))                                                # Order by month to match template
+  arrange(as.numeric(Month))   
 
-My_light <- readRDS("./Objects/physics/NE/light.rds") %>% 
-  # filter(Forcing == "CNRM" & SSP == "ssp126") %>%               # Limit to reference period and variable
+My_AirTemp <- readRDS("./Objects/physics/NM/NM.Air temp.rds") %>%
+  filter(between(Year, 2011, 2019)) %>%                 # Limit to reference period and variable
+  group_by(Month, Shore) %>%                                                # Average across months
+  summarise(Measured = mean(Measured, na.rm = T)) %>%
+  ungroup() %>%
+  arrange(Month)
+
+## Light seems very high....
+My_light <- readRDS("./Objects/physics/NM/NM.light.rds") %>% 
+  filter(Type == "SWF" & between(Year,2011,2019)) %>% 
   group_by(Month) %>% # For now, just average across forcings and SSPs                                                       # Average across months
-  summarise(Measured = mean(Light, na.rm = T)) %>% 
+  summarise(Measured = mean(Measured, na.rm = T)) %>% 
   ungroup() %>% 
   arrange(Month)                                                             # Order to match template
 
-# My_AirTemp <- readRDS("./Objects/Air temp and light.rds") %>% 
-#   filter(between(Year, 2011, 2019), grepl("Air", Type)) %>%                 # Limit to reference period and variable
-#   group_by(Month, Shore) %>%                                                # Average across months
-#   summarise(Measured = mean(Measured, na.rm = T)) %>% 
-#   ungroup() %>% 
-#   arrange(Month)
-
-## ?? ##
 
 #### Create new file ####
 
@@ -126,8 +122,8 @@ Physics_new <- mutate(Physics_template, SLight = My_light$Measured,
                       SI_IceThickness = filter(My_volumes, Compartment == "Inshore S")$Ice_Thickness_avg,
                       SO_SnowThickness = filter(My_volumes, Compartment == "Offshore S")$Snow_Thickness_avg, 
                       SI_SnowThickness = filter(My_volumes, Compartment == "Inshore S")$Snow_Thickness_avg,
-                      # SO_AirTemp = filter(My_AirTemp, Shore == "Offshore")$Measured,
-                      # SI_AirTemp = filter(My_AirTemp, Shore == "Inshore")$Measured
+                      SO_AirTemp = filter(My_AirTemp, Shore == "Offshore")$Measured,
+                      SI_AirTemp = filter(My_AirTemp, Shore == "Inshore")$Measured
                       )
 
 Physics_new <- Physics_new %>%

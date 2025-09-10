@@ -3,11 +3,11 @@
 
 rm(list=ls())                                                               # Wipe the brain
 
-packages <- c("tidyverse", "sf", "furrr", "raster", "data.table")           # List packages
+packages <- c("tidyverse", "sf", "furrr", "raster", "data.table","ncdf4")           # List packages
 lapply(packages, library, character.only = TRUE)                            # Load packages
-source("./R scripts/@_Region file.R")                                       # Define project region 
+source("./R scripts/regionFileWG.R")                                       # Define project region 
 
-plan(multisession)                                                          # Choose the method to paralelise by with furrr
+plan(multisession,workers = availableCores() - 2)                                                          # Choose the method to paralelise by with furrr
 
 all_files <- list.files("./Objects/Shared Data/Rivers/", recursive = TRUE, full.names = TRUE, pattern = ".nc") 
 
@@ -24,21 +24,21 @@ example <- raster(all_files[1], varname = "nav_lat") %>%                    # Ge
   dplyr::select(-c(x,y)) %>%
   drop_na()
 
-ggplot() +
-  geom_sf(data = river_expansion, fill = "orange", colour = "orange") +    # Uncomment me once you've built your extra polygons
-  geom_sf(data = domains, fill = "red", colour = "red") +
-  geom_sf(data = st_transform(example, crs = crs), aes(colour = runoff_land_into_ocean), size = 0.2) +
-  theme_minimal() +
-  zoom +
-  labs(caption = "Check domain overlaps point estimates of river runoff") 
-
-ggsave_map("./Figures/saltless/NM/check.04.1.png", plot = last_plot())
+# ggplot() +
+#   # geom_sf(data = river_expansion, fill = "orange", colour = "orange") +    # Uncomment me once you've built your extra polygons
+#   geom_sf(data = domains, fill = "red", colour = "red") +
+#   geom_sf(data = st_transform(example, crs = crs), aes(colour = runoff_land_into_ocean), size = 0.2) +
+#   theme_minimal() +
+#   zoom +
+#   labs(caption = "Check domain overlaps point estimates of river runoff") 
+# 
+# ggsave_map("./Figures/saltless/NM/check.04.1.png", plot = last_plot())
 
 #### Create larger domain polygon ####
 
 domains <- readRDS("./Objects/domain/domainWG.rds") %>%                             # Import original domain polygon
   st_union() %>%                                                            # Join inshore and offshore zone
-  st_union(river_expansion) %>%                                             # Expand the polygon to catch distributed river run off 
+  # st_union(river_expansion) %>%                                             # Expand the polygon to catch distributed river run off 
   nngeo::st_remove_holes() %>%                                              # Remove holes
   st_sf() %>%                                                               # reinstate class
   mutate(Keep = T) %>%    
@@ -67,7 +67,7 @@ area <- st_union(coords) %>%                                                # Co
 ggplot(area) +                                                              # Check the polygons match correctly with points
   geom_sf(aes(fill = Area_m2), size = 0.05, colour = "white") +
   geom_sf(data = domains, colour = "orange", fill = NA) +
-  zoom +
+  # zoom +
   theme_minimal() +
   labs(caption = "Check if the grid looks regular") +
   NULL
@@ -121,4 +121,4 @@ ggplot(data = summary %>%
        caption = "Did we generate a time series?") +
   NULL
 
-ggsave("./Figures/saltless/NM/check.04.4.png", dpi = 500, width = 18, height = 10 , units = "cm")
+ggsave("./Figures/saltless/NM/check.04.4.TS.png", dpi = 500, width = 18, height = 10 , units = "cm")

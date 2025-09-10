@@ -18,7 +18,7 @@ My_scale <- readRDS("./Objects/domain/domainWG.rds") %>%                        
          D = c(F, T)) %>% 
   gather(key = "slab_layer", value = "Exists", S, D) %>% 
   filter(Exists == T) %>%
-  mutate(Elevation = c(Elevation[1], -60, Elevation[3] + 60)) %>% 
+  mutate(Elevation = c(Elevation[1], -40, Elevation[3] + 40)) %>% 
   mutate(Volume = area * abs(Elevation)) %>% 
   dplyr::select(Shore, slab_layer, Volume)
 
@@ -70,9 +70,8 @@ My_SPM <- readRDS("./Objects/physics/Suspended particulate matter.rds") %>%
   ungroup() %>%
   arrange(Month)                                                            # Order by month to match template
 
-My_Rivers <- readRDS("./Objects/rivers/NE/NE River input.rds") %>%
+My_Rivers <- readRDS("./Objects/rivers/NM/NM.River volume input.rds") %>%
   filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
-  mutate(Month = as.integer(format(.$Date, "%m"))) %>% # convert to month
   group_by(Month) %>%
   summarise(Runoff = mean(Runoff, na.rm = T)) %>%                           # Average by month across years
   ungroup() %>%

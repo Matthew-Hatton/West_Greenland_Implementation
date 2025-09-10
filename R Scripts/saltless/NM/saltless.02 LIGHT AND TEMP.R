@@ -6,22 +6,24 @@ rm(list=ls())                                                               # Wi
 packages <- c("MiMeMo.tools", "sf", "tictoc", "furrr")                      # List packages
 lapply(packages, library, character.only = TRUE)                            # Load packages
 source("./R scripts/regionFileWG.R")                                       # Define project region 
+sf_use_s2(FALSE)
 
-plan(multiprocess)                                                          # Choose the method to parallelise by with furrr
+plan(multisession,workers = availableCores() - 2)                                                          # Choose the method to parallelise by with furrr
 
-all_files <- list.files("./Objects/Shared Data/Light and air temp", recursive = TRUE, full.names = TRUE, pattern = ".nc") %>%
-  as.data.frame() %>%                                                           # Turn the vector into a dataframe/tibble
-  rename(value = 1) %>% 
-  separate(value, into = c(NA, "Year", NA), 
-           remove = FALSE, sep = "_y") %>%                                  # Extract the year from the file name
-  mutate(Year = str_sub(Year, end = -4)) %>%                                # Drop file extension to get number
-  separate(value, into = c(NA, NA, NA, "Type", NA, NA), 
-           remove = FALSE, sep = "[/_]") %>%                                  # Extract the data type and period from the file name
-  rename(File = "value")
+all_files <- list.files("./Objects/Shared Data/light/", recursive = TRUE, full.names = TRUE, pattern = ".nc") %>%
+  as.data.frame() %>%
+  rename(value = 1) %>%
+  mutate(path_fixed = sub("^\\.\\/", "", value)) %>%  # remove leading './' if needed
+  separate(path_fixed, into = c(NA, NA, NA, "Type", NA, NA), sep = "[/_]", remove = FALSE) %>%
+  separate(value, into = c(NA, "Year", NA), sep = "_y", remove = FALSE) %>%
+  mutate(Year = str_sub(Year, end = -4)) %>%
+  rename(File = value) %>% 
+  subset(select = -c(path_fixed))
+
 
 examples <- group_by(all_files, Type) %>% slice(1) %>% ungroup()            # Get one example for each file type
 
-Space <- Window(examples[1,]$File, w = 0, e = 76, s = 65, n = 84)           # Get values to crop a netcdf file spatially at import. Both data types share a grid
+Space <- Window(all_files[1,]$File, w = 0, e = 76, s = 65, n = 84)          # Get values to crop a netcdf file spatially at import. Both data types share a grid
 
 domains <- readRDS("./Objects/domain/domainWG.rds") %>%                             # Load SF polygons of the MiMeMo model domains
   st_transform(crs = 4326)
@@ -29,10 +31,9 @@ domains <- readRDS("./Objects/domain/domainWG.rds") %>%                         
 domains_mask <- expand.grid(Longitude = Space$Lons, Latitude = Space$Lats) %>% # Get the data grid
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326, remove = F) %>%    # Convert to SF
   voronoi_grid(domains) %>%                                                    # Weight points within the model domain
-  select(-c(Elevation, area, geometry)) %>% 
-  st_drop_geometry()
+  select(-c(Elevation, area, geometry))
 
-#ggplot() + geom_sf(data = domains_mask, aes(fill = Cell_area))
+ggplot() + geom_sf(data = domains_mask, aes(fill = Cell_area))
 
 #### Extract Air temperature and light ####
 
@@ -50,10 +51,19 @@ Air <- future_pmap_dfr(all_files, get_air, .progress = TRUE) %>%                
                                   T150 = expression("Air temperature ( "*degree*"C )"))),
          Shore = replace_na(Shore, "Combined"))                                         # Only temperature is grouped by shore, replace NA with combined label
 toc()
-saveRDS(Air, "./Objects/physics/NM/NM.Air temp and light.rds")
+foo <- Air %>% 
+  filter(Type == "T150" & Measured < 300 & Measured > 200) %>% 
+  mutate(Date = as.Date(paste("15", Month, Year, sep = "/"), format = "%d/%m/%Y"),
+         Measured = Measured - 273.15) # Kelvin to celsius 
+saveRDS(Air, "./Objects/physics/NM/NM.light.rds")
 
 #### Plot ####
 
+ggplot() +
+  geom_line(data = foo %>% filter(Year == 2020),aes(x = Date,y = Measured,colour = Shore))
+
+
+## light work air temperature is fucked
 ggplot(data = Air) +
   geom_line(aes(x = Date, y = Measured, colour = Shore), size = 0.25) +
   theme_minimal() +
