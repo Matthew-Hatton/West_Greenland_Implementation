@@ -130,4 +130,10 @@ Physics_new <- mutate(Physics_template, SLight = My_light$Measured,
                       # SI_AirTemp = filter(My_AirTemp, Shore == "Inshore")$Measured
                       )
 
+Physics_new <- Physics_new %>%
+  mutate(across(
+    .cols = -SI_IceFree,  # apply to all columns except Ice_pres
+    .fns = ~ ifelse(SI_IceFree == 1 & is.na(.), 0, .)
+  )) # change NaN to 0 when Ice presence is 0
+
 write.csv(Physics_new, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/physics_WG_2011-2019.csv"), row.names = F)
