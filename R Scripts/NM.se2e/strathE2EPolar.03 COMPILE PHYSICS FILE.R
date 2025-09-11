@@ -75,7 +75,7 @@ My_AirTemp <- readRDS("./Objects/physics/NM/NM.Air temp.rds") %>%
 
 ## Light seems very high....
 My_light <- readRDS("./Objects/physics/NM/NM.light.rds") %>% 
-  filter(Type == "SWF" & between(Year,2011,2019)) %>% 
+  filter(between(Year,2011,2019)) %>% 
   group_by(Month) %>% # For now, just average across forcings and SSPs                                                       # Average across months
   summarise(Measured = mean(Measured, na.rm = T)) %>% 
   ungroup() %>% 

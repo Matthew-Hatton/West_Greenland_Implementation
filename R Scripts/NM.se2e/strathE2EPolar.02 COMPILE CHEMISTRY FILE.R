@@ -19,14 +19,14 @@ My_boundary_data<- readRDS("./Objects/boundary/NM/NM.Boundary measurements.rds")
 
 My_DIN_fix <- readRDS("./Objects/boundary/Ammonia to DIN.rds")
 
-NH4_boundary <- readRDS("./Objects/rivers/NH4 River Concentrations.RDS") %>% 
+#these are NE - couldn't get prediction to work. This is better than nothing for now
+NH4_boundary <- readRDS("./Objects/rivers/NM/NH4 River Concentrations.RDS") %>% 
   mutate(monthly_NH4 = monthly_NH4*(1/14.006720)*1e3) # Convert mg/l to mmol/m^3
-NO3_boundary <- readRDS("./Objects/rivers/NO3 River Concentrations.RDS") %>% 
+NO3_boundary <- readRDS("./Objects/rivers/NM/NO3 River Concentrations.RDS") %>% 
   mutate(monthly_no3 = monthly_no3*(1/14.006720)*1e2) # Convert mg/l to mmol/m^3
 
-## SHARED DATA MISSING ## 
-My_atmosphere <- readRDS(stringr::str_glue("./Objects/misc/Atmospheric N deposition.rds")) %>%
-  filter(between(Year, 2010, 2019)) %>%     
+My_atmosphere <- readRDS(stringr::str_glue("./Objects/misc/NM.Atmospheric N deposition.rds")) %>%
+  filter(between(Year,2011,2019)) %>% 
   group_by(Month, Oxidation_state, Shore,  Year) %>%
   summarise(Measured = sum(Measured, na.rm = T)) %>%                                         # Sum across deposition states
   summarise(Measured = mean(Measured, na.rm = T)) %>%                                        # Average over years
