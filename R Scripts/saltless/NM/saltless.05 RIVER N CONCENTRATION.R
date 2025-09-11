@@ -1,57 +1,105 @@
-## THIS IS WHERE MANKOFF DATA AND EXPONENTIAL DECAY GO IN
+rm(list = ls()) # reset
 
-
-#### Set up ####
-
-rm(list=ls())                                                               # Wipe the brain
-
+set.seed(710)
 library(tidyverse)
-library(sf)
-source("./R scripts/@_Region file.R")                                       # Define project region 
+library(raster)
 
-domains <- readRDS("./Objects/Domains.rds") %>%                             # Import domain
-  st_union() %>%                                                            # Create whole domain shape 
-  nngeo::st_remove_holes() %>%                                              # Fill in the gap to capture rivers on Svalbard
-  st_make_valid() %>%                                                 
-  st_buffer(dist = 30000) %>%                                               # Increase the size to spill slightly onto land
-  nngeo::st_remove_holes() %>%                                              # Remove the new holes
-  st_as_sf() %>%                                                            # Reinstate formatting
-  mutate(Keep = T)                                         
+source("./R Scripts/regionFileWG.R")
 
-#### Spatial subsetting ####
+water_quality <- read.csv("I:/Science/MS/users/students/Hatton_Matthew/Documents/PhD/24-25/Recovery Time Manuscript/Objects/Shared Data/Rivers/ArcticGRO Water Quality Data.csv")[-c(1:7),]   # get water quality data and clean
 
-rivers <- read.csv("./Data/River_N/original/GNM_database/mouth/mouth_coordinates.csv", sep = ";") %>% # Import river mouth positions
-  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%                        # Set as sf object
-  st_transform(crs = crs) %>%                                               # Match model domain crs
-  st_join(domains) %>%                                                      # Check which rivers fall in the model domain
-  drop_na() %>%                                                             # Drop those outside
-  st_drop_geometry()                                                        # Drop special formatting for speed
+names(water_quality) <- water_quality[1,]
 
-## Visual check we got the rivers we were after 
-#ggplot(domains) +
-#  geom_sf() +
-#  geom_sf(data = rivers, aes(colour = Keep), size = 0) +
-#  coord_sf(xlim = st_bbox(domains)[c("xmin", "xmax")], 
-#           ylim = st_bbox(domains)[c("ymin", "ymax")])
+wq <- water_quality[-c(1,2),]
 
-#### Extract data ####
+names(wq) <- make.unique(names(wq))
 
-Nitrogen <- read.csv("./Data/River_N/original/GNM_database/mouth/Nload.csv", sep = ";") %>% # Import annual nitrogen load
-  filter(basinid %in% rivers$basinid) %>%                                   # Limit to rivers of interest
-  pivot_longer(-basinid, names_to = "Year", values_to = "Nitrogen")         # Get all years into a single column
+wq <- wq %>%
+  filter(Date != "" & NO3 != "") %>% 
+  subset(select = c(Discharge,NO3,NH4,Date)) %>% 
+  mutate(month = month(Date)) %>% 
+  arrange(month)
 
-N_concentration <- read.csv("./Data/River_N/original/GNM_database/mouth/discharge.csv", sep = ";") %>% # Get river volumes
-  filter(basinid %in% rivers$basinid) %>%                                   # Limit to rivers of interest
-  pivot_longer(-basinid, names_to = "Year", values_to = "Discharge") %>%    # Get years into one column
-  left_join(Nitrogen) %>%                                                   # Pair nitrogen load with river volume
-  mutate(Year = as.numeric(str_sub(Year, start = 2)),                       # Clean year column
-         Nitrogen = Nitrogen * 1e6,                                         # Convert kg to milligrams
-         Discharge = Discharge * 1e12) %>%                                  # Convert km^3 to l
-  mutate(Concentration = Nitrogen/Discharge) %>%                            # Calculate N concentration for each river/year
-  group_by(Year) %>%                                                        # Per year
-  summarise(`DIN mg.l` = weighted.mean(Concentration, Discharge))           # Get the mean concentration of rivers, weighted towards bigger rivers
+# CONVERT AND CLEAN
+wq$NO3 <- as.numeric(wq$NO3)
+wq$NH4 <- as.numeric(wq$NH4)
+wq <- wq[!is.na(wq$NO3),]
+wq <- wq[!is.na(wq$NH4),]
+wq$Discharge <- as.numeric(wq$Discharge)
+wq$Discharge_scaled <- (wq$Discharge)/1000 #convert from litres to cubic meters
 
-saveRDS(N_concentration, "./Objects/River DIN.rds")
+## BUILD
 
-ggplot(N_concentration) +
-  geom_line(aes(x = Year, y = `DIN mg.l`))
+model.NO3 <- nls(NO3 ~ a * (1 - b)^Discharge_scaled,#fitting exponential decay function
+                 data = wq,
+                 start = list(a = 150, b = 0.0001))#provide estimates of start parameters, then model tries to converge
+
+model.NH4 <- nls(NH4 ~ a * (1 - b)^Discharge_scaled,
+                 data = wq,
+                 start = list(a = 150, b = 0.0001))
+
+
+summary(model.NO3)
+summary(model.NH4)
+# a and b statistically significant in  both cases
+
+## Load Mankoff Data
+# test
+year <- 2011
+
+tst <- nc_open(paste0("I:/Science/MS/users/students/Hatton_Matthew/Documents/PhD/24-25/Recovery Time Manuscript/Objects/Shared Data/Rivers/Mankoff/discharge/MAR_",year,".nc"))
+
+discharge <- ncvar_get(tst, "discharge") # it's the whole of Greenland - will have to crop
+
+lon <- ncvar_get(tst, "lon")
+lat <- ncvar_get(tst, "lat")
+
+dates <- seq(as.Date("2010-01-01"), as.Date("2010-12-31"), by = "day")
+
+month_index <- month(dates)
+
+monthly_discharge <- sapply(1:12, function(m) {
+  rows_in_month <- which(month_index == m)
+  # Average discharge for each column (point) over the days in the month
+  colMeans(discharge[rows_in_month, , drop = FALSE], na.rm = TRUE)
+})  # Result: [N x 12] matrix
+
+monthly <- data.frame(
+  lon = lon,
+  lat = lat,
+  monthly_discharge
+)
+
+names(monthly)[3:14] <- paste0("dis_", seq(1,12))
+
+all_discharge <- monthly %>%
+  pivot_longer(
+    cols = starts_with("dis_"),         # all discharge columns
+    names_to = "month",                 # new column for month names
+    names_prefix = "dis_",              # remove "dis_" from month names
+    values_to = "discharge"             # new column for values
+  ) %>% 
+  mutate(Year = year)
+
+## crop
+all_discharge_cropped <- all_discharge %>% 
+  filter(lon < maxlon & lon > minlon & lat < maxlat & lat > minlat) %>%  # just on country boundaries, so can be rough
+  group_by(month) %>% 
+  summarise(discharge = mean(discharge,na.rm = T)*10e1)
+
+monthly_predict <- all_discharge_cropped %>%
+  ungroup() %>%
+  mutate(
+    month = as.numeric(month),
+    Discharge_scaled = discharge,
+    NO3 = predict(model.NO3, newdata = data.frame(Discharge_scaled = discharge))/10,
+    NH4 = predict(model.NH4, newdata = data.frame(Discharge_scaled = discharge))
+  ) %>% 
+  arrange(month)
+
+
+ggplot() +
+  geom_line(data = monthly_predict,aes(x = month,y = NO3))
+
+
+### not working. For now just use the NE values...

@@ -12,14 +12,14 @@ source("./R Scripts/regionFileWG.R")
 domains <- readRDS("./Objects/domain/domainWG.rds") %>%                             # Import inshore polygon
   st_transform(crs = 4326)
 
-Reduced <- brick("./Shared data/ISIMIP Atmosphere/ndep-nhx_histsoc_monthly_1901_2021.nc") # import reduced nitrogen deposition
-Oxidised <- brick("./Shared data/ISIMIP Atmosphere/ndep-noy_histsoc_monthly_1901_2021.nc")# import oxidised nitrogen deposition
+Reduced <- brick("../Recovery Time Manuscript/Objects/Shared data/ISIMIP Atmosphere/ndep-nhx_histsoc_monthly_1901_2021.nc") # import reduced nitrogen deposition
+Oxidised <- brick("../Recovery Time Manuscript/Objects/Shared data/ISIMIP Atmosphere/ndep-noy_histsoc_monthly_1901_2021.nc")# import oxidised nitrogen deposition
 
-ReducedSSP370<-brick("./Shared data/ISIMIP Atmosphere/ndep-nhx_ssp370soc_monthly_2015_2100.nc")
-OxidisedSSP370<-brick("./Shared data/ISIMIP Atmosphere/ndep-noy_ssp370soc_monthly_2015_2100.nc")
+ReducedSSP370<-brick("../Recovery Time Manuscript/Objects/Shared data/ISIMIP Atmosphere/ndep-nhx_ssp370soc_monthly_2015_2100.nc")
+OxidisedSSP370<-brick("../Recovery Time Manuscript/Objects/Shared data//ISIMIP Atmosphere/ndep-noy_ssp370soc_monthly_2015_2100.nc")
 
-ReducedSSP126<-brick("./Shared data/ISIMIP Atmosphere/ndep-nhx_ssp126soc_monthly_2015_2100.nc")
-OxidisedSSP126<-brick("./Shared data/ISIMIP Atmosphere/ndep-noy_ssp126soc_monthly_2015_2100.nc")
+ReducedSSP126<-brick("../Recovery Time Manuscript/Objects/Shared data/ISIMIP Atmosphere/ndep-nhx_ssp126soc_monthly_2015_2100.nc")
+OxidisedSSP126<-brick("../Recovery Time Manuscript/Objects/Shared data/ISIMIP Atmosphere/ndep-noy_ssp126soc_monthly_2015_2100.nc")
   
 #### Calculate mean disturbance per habitat area, weighting by cell coverage ####
 
@@ -78,7 +78,4 @@ ggsave("./Figures/saltless/Atmospheric N Deposition.png", last_plot(), dpi = 500
 #### Save ####
 Deposition_ssp %>% 
   dplyr::select(Month, Oxidation_state, Shore,  Year, SSP, Measured) %>%  
-  saveRDS("./Objects/Atmospheric N deposition.rds")
-
-#### Split ####
-#we need varying SSP's/Forcings saved 
+  saveRDS("./Objects/NE.Atmospheric N deposition.rds")
