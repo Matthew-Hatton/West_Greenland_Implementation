@@ -17,7 +17,7 @@ tic()
 ## Initialise ##
 n_runs <- availableCores() - 2
 n_iter <- 250
-rounds <- seq(1,3)
+rounds <- seq(2,4)
 n_years <- 40
 ## ########## ##
 
@@ -32,7 +32,7 @@ parallel_optimise <- function(n_iter,n_years){
 
 likelihoods <- list()
 
-message(paste0("ETC: ",round((n_iter * n_years * length(rounds))/1800,digits = 1), " Hours.\n",round((n_iter * n_years * length(rounds))/(1800*24),digits = 1)," Days.")) ## 2.17s per optimisation year per iteration
+message(paste0("ETC: ",round((n_iter * n_years * length(rounds))/(3600/2.17),digits = 1), " Hours.\n",round((n_iter * n_years * length(rounds))/(1800*24),digits = 1)," Days.")) ## 2.17s per optimisation year per iteration
 
 for (round in rounds) {
   # debug
@@ -50,7 +50,7 @@ for (round in rounds) {
   for (i in 1:n_runs) { # build up current likelihoods df
     tmp <- data.frame(Accepted = opt_eco[[i]][["parameter_accepted_history"]][["annual_obj"]],
                       Model = i,
-                      Iteration = seq(1,round*n_iter),
+                      Iteration = seq(((round-1)*n_iter),(round*n_iter)-1), # so we don't start at 0
                       Round = round)
     likelihood <- rbind(likelihood,tmp)
   }
@@ -58,7 +58,7 @@ for (round in rounds) {
   likelihoods <- append(likelihoods,list(likelihood))
   
   if (round != 1) { #store the previous results
-    lks_prev <- likelihoods[round] %>% 
+    lks_prev <- do.call(rbind, likelihoods[1:(round - 1)]) %>% 
       as.data.frame()
     plt <- ggplot() +
       geom_line(data = lks_prev,
@@ -80,7 +80,7 @@ for (round in rounds) {
   ## Save the new values
   new_pref <- opt_eco[[largest]][["new_parameter_data"]][["new_preference_matrix"]]
   new_uptake_mort <- opt_eco[[largest]][["new_parameter_data"]][["new_uptake_mort_rate_parameters"]]
-  new_microbiology <- opt_eco[[28]][["new_parameter_data"]][["new_microbiology_parameters"]]
+  new_microbiology <- opt_eco[[largest]][["new_parameter_data"]][["new_microbiology_parameters"]]
 
   write.csv(new_pref,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Param/fitted_preference_matrix_new.csv")
   write.csv(new_uptake_mort,"C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Param/fitted_uptake_mort_rates_new.csv")
