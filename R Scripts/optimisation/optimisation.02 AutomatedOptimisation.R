@@ -17,7 +17,7 @@ tic()
 ## Initialise ##
 n_runs <- availableCores() - 2
 n_iter <- 250
-rounds <- seq(2,4)
+rounds <- seq(3,4)
 n_years <- 40
 ## ########## ##
 
@@ -57,7 +57,7 @@ for (round in rounds) {
   
   likelihoods <- append(likelihoods,list(likelihood))
   
-  if (round != 1) { #store the previous results
+  if (round != rounds[1]) { #store the previous results
     lks_prev <- do.call(rbind, likelihoods[1:(round - 1)]) %>% 
       as.data.frame()
     plt <- ggplot() +
