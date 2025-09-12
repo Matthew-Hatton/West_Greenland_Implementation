@@ -2,6 +2,10 @@
 ## Each round takes the previous rounds highest likelihood and continues running.
 ## Simulation time can be very long.
 
+#Increased max uptakes:
+#Phyt * 2
+#Zoo * 2
+
 rm(list = ls()) # reset
 
 library(StrathE2EPolar)
@@ -16,9 +20,9 @@ future:::ClusterRegistry("stop") # make sure all additional clusters are closed
 tic()
 ## Initialise ##
 n_runs <- availableCores() - 2
-n_iter <- 250
-rounds <- seq(3,4)
-n_years <- 40
+n_iter <- 500
+rounds <- seq(1,15)
+n_years <- 50
 ## ########## ##
 
 
@@ -75,7 +79,7 @@ for (round in rounds) {
   
   
 
-  largest <- likelihood %>% filter(Iteration == (round * n_iter)) %>% arrange(-Accepted) %>% slice(1) %>% .$Model
+  largest <- likelihood %>% filter(Iteration == (round * n_iter)-1) %>% arrange(-Accepted) %>% slice(1) %>% .$Model
   
   ## Save the new values
   new_pref <- opt_eco[[largest]][["new_parameter_data"]][["new_preference_matrix"]]
