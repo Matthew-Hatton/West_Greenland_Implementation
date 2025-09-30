@@ -2,10 +2,6 @@
 ## Each round takes the previous rounds highest likelihood and continues running.
 ## Simulation time can be very long.
 
-#Increased max uptakes:
-#Phyt * 2
-#Zoo * 2
-
 rm(list = ls()) # reset
 
 library(StrathE2EPolar)
@@ -21,8 +17,8 @@ tic()
 ## Initialise ##
 n_runs <- availableCores() - 2
 n_iter <- 500
-rounds <- seq(1,15)
-n_years <- 50
+rounds <- seq(1,3)
+n_years <- 40
 ## ########## ##
 
 
@@ -43,7 +39,7 @@ for (round in rounds) {
   # round = 2
   message(paste0("Round: ",round))
   opt_eco <- future_map(1:n_runs, ~ parallel_optimise(n_iter,n_years),.progress = F, .options = furrr_options(seed = TRUE)) # run parallel optimise
-  saveRDS(opt_eco,paste0("./Objects/Optimisation/NM/AutoOptimise/WG.NM.round.",round,".RDS")) # save it out (incase we need it again)
+  saveRDS(opt_eco,paste0("./Objects/Optimisation/NM/AutoOptimise/Experiment 2/WG.NM.round.",round,".RDS")) # save it out (incase we need it again)
   
   ## initialise data storage
   likelihood <- data.frame(Accepted = numeric(),
@@ -69,12 +65,12 @@ for (round in rounds) {
                 aes(x = Iteration,y = Accepted,group = Model),linewidth = 0.1) +
       geom_line(data = likelihood,aes(x = Iteration,y = Accepted,group = Model),linewidth = 0.1) +
       NULL
-    ggsave(plot = plt,paste0("./Figures/optimisation/NM/Trajectories/Trajectories.Round.",round,".png"),width = 1920,height = 1080,units = "px")
+    ggsave(plot = plt,paste0("./Figures/optimisation/NM/Trajectories/Experiment 2/Trajectories.Round.",round,".png"),width = 1920,height = 1080,units = "px")
   } else{
     plt <- ggplot() +
       geom_line(data = likelihood,aes(x = Iteration,y = Accepted,group = Model),linewidth = 0.1) +
       NULL
-    ggsave(plot = plt,paste0("./Figures/optimisation/NM/Trajectories/Trajectories.Round.",round,".png"),width = 1920,height = 1080,units = "px")
+    ggsave(plot = plt,paste0("./Figures/optimisation/NM/Trajectories/Experiment 2/Trajectories.Round.",round,".png"),width = 1920,height = 1080,units = "px")
   }
   
   
@@ -95,19 +91,19 @@ for (round in rounds) {
                      "2011-2019")
   results <- e2ep_run(model,nyears = 50)
   
-  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/Biomass.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
+  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/Experiment 2/Biomass.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
   e2ep_plot_biomass(model,results = results)
   dev.off()
   
-  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/TS.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
+  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/Experiment 2/TS.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
   e2ep_plot_ts(model,results = results)
   dev.off()
   
-  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/CompareObs.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
+  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/Experiment 2/CompareObs.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
   e2ep_compare_obs(model = model,results = results,selection = "ANNUAL",)
   dev.off()
   
-  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/OptDiagnostics.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
+  jpeg(paste0("./Figures/optimisation/NM/Diagnostic Plots/Experiment 2/OptDiagnostics.Round.",round,".jpeg"),units = "px",width = 1920,height = 1080)
   e2ep_plot_opt_diagnostics(model = model,results = opt_eco[[largest]],selection = "ECO")
   dev.off()
 }
