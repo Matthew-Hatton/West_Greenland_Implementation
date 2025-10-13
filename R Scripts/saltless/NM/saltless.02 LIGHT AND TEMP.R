@@ -13,7 +13,7 @@ plan(multisession,workers = availableCores() - 2)                               
 all_files <- list.files("./Objects/Shared Data/light/", recursive = TRUE, full.names = TRUE, pattern = ".nc") %>%
   as.data.frame() %>%
   rename(value = 1) %>%
-  mutate(path_fixed = sub("^\\.\\/", "", value)) %>%  # remove leading './' if needed
+  mutate(path_fixed = sub("^\\.\\/", "", value)) %>%
   separate(path_fixed, into = c(NA, NA, NA, "Type", NA, NA), sep = "[/_]", remove = FALSE) %>%
   separate(value, into = c(NA, "Year", NA), sep = "_y", remove = FALSE) %>%
   mutate(Year = str_sub(Year, end = -4)) %>%
@@ -62,8 +62,6 @@ saveRDS(Air, "./Objects/physics/NM/NM.light.rds")
 ggplot() +
   geom_line(data = foo %>% filter(Year == 2020),aes(x = Date,y = Measured,colour = Shore))
 
-
-## light work air temperature is fucked
 ggplot(data = Air) +
   geom_line(aes(x = Date, y = Measured, colour = Shore), size = 0.25) +
   theme_minimal() +
