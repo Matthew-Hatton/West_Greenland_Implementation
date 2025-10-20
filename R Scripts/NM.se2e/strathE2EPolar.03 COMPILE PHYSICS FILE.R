@@ -1,10 +1,8 @@
 ## Overwrite example driving data (physics)
 
 #### Setup ####
-
-rm(list=ls()) # reset
-
 library(MiMeMo.tools)
+source("./R Scripts/regionFileWG.R")
 
 Physics_template <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Driving/physics_BS_2011-2019.csv") # Read in example Physical drivers
 
@@ -21,7 +19,7 @@ My_scale <- readRDS("./Objects/domain/domainWG.rds") %>%                        
   dplyr::select(Shore, slab_layer, Volume)
 
 My_H_Flows <- readRDS("./Objects/flows/NM/H-Flows.rds") %>% 
-  filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
+  filter(between(Year, start_year, end_year)) %>%                                     # Limit to reference period
   group_by(across(-c(Year, Flow))) %>%                                      # Group over everything except year and variable of interest
   summarise(Flow = mean(Flow, na.rm = T)) %>%                               # Average flows by month over years
   ungroup() %>% 
@@ -32,21 +30,21 @@ My_H_Flows <- readRDS("./Objects/flows/NM/H-Flows.rds") %>%
 
 My_V_Flows <- readRDS("./Objects/physics/NM/vertical diffusivity.rds") %>%
   mutate(Year = Year + 2000) %>%  # Years set to 0 fix
-  filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
+  filter(between(Year, start_year,end_year)) %>%                                     # Limit to reference period
   group_by(Month) %>% 
   summarise(V_diff = mean(Vertical_diffusivity, na.rm = T)) %>% 
   ungroup() %>% 
   arrange(Month)                                                            # Order by month to match template
 
 My_volumes <- readRDS("./Objects/physics/NM/NM.TS.rds") %>% 
-  filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
+  filter(between(Year, start_year,end_year)) %>%                                     # Limit to reference period
   group_by(Compartment, Month) %>%                                          # By compartment and month
   summarise(across(Salinity_avg:Ice_conc_avg, mean, na.rm = T)) %>%         # Average across years for multiple columns
   ungroup() %>% 
   arrange(Month)                                                            # Order by month to match template
 
 My_SPM <- readRDS("./Objects/physics/Suspended particulate matter.rds") %>% 
-  filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
+  filter(between(Year, 2011,2019)) %>%                                     # Limit to reference period
   group_by(Shore, Month) %>% 
   summarise(SPM = mean(SPM, na.rm = T)) %>%                                 # Average by month across years
   ungroup() %>% 
@@ -60,31 +58,51 @@ My_Waves <- readRDS("./Objects/physics/Significant wave height.rds") %>%  #*2000
   summarise(mean_height = mean(mean_height))# Arrange to match template  
 
 My_Rivers <- readRDS("./Objects/rivers/NM/NM.River volume input.rds") %>%
-  filter(between(Year, 2011, 2019)) %>%                                     # Limit to reference period
+  filter(between(Year, start_year,end_year)) %>%                                     # Limit to reference period
   group_by(Month) %>%
   summarise(Runoff = mean(Runoff, na.rm = T)) %>%                           # Average by month across years
   ungroup() %>%
   arrange(as.numeric(Month))   
 
-My_AirTemp <- readRDS("./Objects/physics/NM/NM.Air temp.rds") %>%
-  filter(between(Year, 2011, 2019)) %>%                 # Limit to reference period and variable
-  group_by(Month, Shore) %>%                                                # Average across months
-  summarise(Measured = mean(Measured, na.rm = T)) %>%
-  ungroup() %>%
-  arrange(Month)
+if (start_year < 2060) {
+  My_AirTemp <- readRDS("./Objects/physics/NM/NM.Air temp.rds") %>%
+    filter(between(Year, start_year,end_year)) %>%                 # Limit to reference period and variable
+    group_by(Month, Shore) %>%                                                # Average across months
+    summarise(Measured = mean(Measured, na.rm = T)) %>%
+    ungroup() %>%
+    arrange(Month)
+} else if (start_year >= 2060){
+  My_AirTemp <- readRDS("./Objects/physics/NM/NM.Air temp.rds") %>%
+    filter(between(Year,2050,2059)) %>%                 # Limit to reference period and variable
+    group_by(Month, Shore) %>%                                                # Average across months
+    summarise(Measured = mean(Measured, na.rm = T)) %>%
+    ungroup() %>%
+    arrange(Month)
+}
 
-## Light seems very high....
-My_light <- readRDS("./Objects/physics/NM/NM.light.rds") %>% 
-  filter(between(Year,2011,2019)) %>% 
-  group_by(Month) %>% # For now, just average across forcings and SSPs                                                       # Average across months
-  summarise(Measured = mean(Measured, na.rm = T)) %>% 
-  ungroup() %>% 
-  arrange(Month)                                                             # Order to match template
+## Light in 2050 is broken in NM, use 2060s data for that one
+if (start_year != 2050) {
+  My_light <- readRDS("./Objects/physics/NM/NM.light.rds") %>% 
+    filter(between(Year,start_year,end_year)) %>% 
+    group_by(Month) %>% # For now, just average across forcings and SSPs                                                       # Average across months
+    summarise(Measured = mean(Measured, na.rm = T)) %>% 
+    ungroup() %>% 
+    arrange(Month)   
+} else{
+  My_light <- readRDS("./Objects/physics/NM/NM.light.rds") %>% 
+    filter(between(Year,2060,2069)) %>% 
+    group_by(Month) %>% # For now, just average across forcings and SSPs                                                       # Average across months
+    summarise(Measured = mean(Measured, na.rm = T)) %>% 
+    ungroup() %>% 
+    arrange(Month)   
+}
+                                                          # Order to match template
 
 
 #### Create new file ####
 
-Physics_new <- mutate(Physics_template, SLight = My_light$Measured,
+Physics_new <- mutate(Physics_template,
+                      SLight = My_light$Measured,
                       ## Flows, should be proportions of volume per day
                       SO_OceanIN = filter(My_H_Flows, slab_layer == "S", Shore == "Offshore", Neighbour == "Ocean", Direction == "In")$Flow,
                       D_OceanIN = filter(My_H_Flows, slab_layer == "D", Shore == "Offshore", Neighbour == "Ocean", Direction == "In")$Flow,
@@ -132,4 +150,5 @@ Physics_new <- Physics_new %>%
     .fns = ~ ifelse(SI_IceFree == 1 & is.na(.), 0, .)
   )) # change NaN to 0 when Ice presence is 0
 
-write.csv(Physics_new, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/physics_WG_2011-2019.csv"), row.names = F)
+write.csv(Physics_new, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/",start_year,"-",end_year,"/Driving/physics_WG_",start_year,"-",end_year,".csv"),
+          row.names = F)

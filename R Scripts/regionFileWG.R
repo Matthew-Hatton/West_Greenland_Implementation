@@ -8,6 +8,8 @@ library(sp)
 implementation <- "West_Greenland"
 ssp <- "ssp126"
 Force <- "CNRM"
+start_year <- 2040
+end_year <- 2049
 
 crs <- 3035                                                              # Specify the map projection for the project
 

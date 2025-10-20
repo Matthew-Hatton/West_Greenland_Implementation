@@ -1,10 +1,9 @@
-rm(list = ls()) #reset
-
 library(MiMeMo.tools)
-Boundary_template <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Driving/chemistry_BS_2011-2019.csv")  # Read in example boundary drivers
+source("./R Scripts/regionFileWG.R")
+Boundary_template <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/chemistry_WG_2011-2019.csv")  # Read in example boundary drivers
 
 My_boundary_data<- readRDS("./Objects/boundary/NM/NM.Boundary measurements.rds") %>%                        # Import data
-  filter(between(Year, 2011, 2019)) %>%                                                      # Limit to reference period
+  filter(between(Year, start_year,end_year)) %>%                                                      # Limit to reference period
   group_by(Month, Compartment, Variable) %>%                                                 # Average across years
   summarise(Measured = mean(Measured, na.rm = T)) %>% 
   ungroup() %>% 
@@ -61,4 +60,5 @@ Boundary_new <- mutate(Boundary_template,
                        SI_other_nitrate_flux = 0,   # Can be used for scenarios
                        SI_other_ammonia_flux = 0)    
 
-write.csv(Boundary_new, file = "C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/chemistry_WG_2011-2019.csv", row.names = F)
+write.csv(Boundary_new, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/",start_year,"-",end_year,"/Driving/chemistry_WG_",start_year,"-",end_year,".csv"),
+                                      row.names = F)

@@ -52,8 +52,7 @@ Physical_parameters$Value[9:12] <- off_sed_prop$prop #Offshore
 ## final check
 sediment <- in_sed_prop %>% rbind(.,off_sed_prop)
 if (sum(sediment$prop) == 1) {
-  write.csv(Physical_parameters,
-            file =  "C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Param/physical_parameters_WG.csv",
+  write.csv(Physical_parameters, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/",start_year,"-",end_year,"/Param/physical_parameters_WG_",start_year,"-",end_year,".csv"),
             row.names = F)
 } else{
   message("Your sediment proportions don't add up to 1! Failed to save.")

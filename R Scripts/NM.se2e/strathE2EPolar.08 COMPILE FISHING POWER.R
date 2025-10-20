@@ -8,5 +8,5 @@ source("./R Scripts/regionFileWG.R")
 power_template <- read.csv("./Objects/fishing/Power/fishing_power_WG_2011-2019.csv") %>% 
   subset(select = -c(X)) # fix saving mistake
 
-write.csv(power_template, file =  paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Param/fishing_power_WG_2011-2019.csv"),
+write.csv(power_template, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/",start_year,"-",end_year,"/Param/fishing_power_WG_",start_year,"-",end_year,".csv"),
           row.names = F)

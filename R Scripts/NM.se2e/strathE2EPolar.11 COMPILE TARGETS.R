@@ -41,7 +41,7 @@ target_new$SD_of_measure[1] <- pp$SD_of_measure[1]
 target_new$Region[1] <- pp$Region
 target_new$Source[1] <- pp$Source[1]
   
-write.csv(target_new, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Target/annual_observed_WG_2011-2019.csv"),
+write.csv(target_new, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/",start_year,"-",end_year,"/Target/annual_observed_WG_",start_year,"-",end_year,".csv"),
           row.names = F)
-write.csv(target_new, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Target/annual_observed_WG_2011-2019.csv"),
+write.csv(target_new, file = paste0("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/",start_year,"-",end_year,"/Target/annual_observed_WG_",start_year,"-",end_year,".csv"),
           row.names = F)
