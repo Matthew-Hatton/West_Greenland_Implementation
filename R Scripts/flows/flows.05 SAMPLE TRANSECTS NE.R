@@ -6,10 +6,10 @@
 rm(list=ls())                                                               # Wipe the brain
 Packages <- c("tidyverse", "nemoRsem", "data.table", "furrr")                         # List packages
 lapply(Packages, library, character.only = TRUE)                                # Load packages
-source("./Objects/@_Region file.R")                                       # Define project region 
-plan(multisession)                                                          # Choose the method to parallelise by with furrr
+source("./R Scripts/regionFileWG.R")                                       # Define project region 
+plan(multisession,workers = availableCores() - 2)                                                          # Choose the method to parallelise by with furrr
 
-Transects <- readRDS("./Objects/Boundary_transects.rds")                    # Import transects to sample at
+Transects <- readRDS("./Objects/boundary/NE.CNRM.SSP370/Boundary_transects.rds")                    # Import transects to sample at
 
 #### Summarise along transects ####
 NE_boundary_summary_V2 <- function (saved, transects, vars = c("NO3", "NH4", "Detritus")) 
@@ -34,7 +34,7 @@ NE_boundary_summary_V2 <- function (saved, transects, vars = c("NO3", "NH4", "De
   return(result)
 }
 
-Summary <- list.files("./Objects/NE_Days/", full.names = T) %>%              # Get the names of all data files
+Summary <- list.files("./Objects/NEMO RAW/NE_Days/", full.names = T) %>%              # Get the names of all data files
    future_map(NE_boundary_summary_V2, transects = Transects, 
               vars = c("NO3", "NH4", "Detritus", "Diatoms", "Other_phytoplankton"), .progress = T) # Sample NE output along domain boundary
 
@@ -42,16 +42,16 @@ Summary <- list.files("./Objects/NE_Days/", full.names = T) %>%              # G
 
 Flows <- map(Summary, `[[`, 1) %>%                                          # Subset the summary results
   data.table::rbindlist() %>% 
-  saveRDS("./Objects/H-Flows.rds")                                          
+  saveRDS("./Objects/CNRM-SSP370-H-Flows.rds")                                          
 
 #### Save boundary conditions ####
 
 Boundary <- map(Summary, `[[`, 2) %>%                                       # Subset the summary results
   data.table::rbindlist()
-saveRDS(Boundary, "./Objects/Boundary measurements.rds")                         
+saveRDS(Boundary, "./Objects/boundary/NE.CNRM.SSP370/Boundary measurements.rds")                         
 
 ggplot(Boundary) + geom_line(aes(x= Date, y = Measured,color = Forcing,linetype = SSP), alpha = 0.5) +
-  facet_grid(rows = vars(Variable), cols = vars(Compartment), scales = "free_y") +
+  facet_grid(rows = vars(Variable), cols = vars(Compartment), scales = "free") +
   theme_minimal() +
   labs(y = "Measured at ocean boundary", caption = "Average NEMO-ERSEM outputs along our model perimeter") +
   theme(legend.position = "top")

@@ -19,7 +19,7 @@ NEMO_WG <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2E
   subset(select = c(Month,SLight)) %>% 
   mutate(Source = "WG NEMO")
 
-NEMO_BS <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/physics_BS_2011-2019.csv") %>% 
+NEMO_BS <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Driving/physics_BS_2011-2019.csv") %>% 
   subset(select = c(Month,SLight)) %>% 
   mutate(Source = "BS NEMO")
 
@@ -32,12 +32,14 @@ ggplot() +
   theme(legend.position = "top") +
   scale_x_continuous(labels = c(1:12),breaks = c(1:12)) +
   NULL
+ggsave("I:/Science/MS/users/students/Hatton_Matthew/Documents/PhD/24-25/West_Greenland_Implementation/Figures/optimisation/NM/Test Runs/LightDrivers.png",height = 3000,width = 5000,unit = "px")
+
 
 NEMO_WG_AIR <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/physics_WG_2011-2019.csv") %>% 
   subset(select = c(Month,SI_AirTemp)) %>% 
   mutate(Source = "WG NEMO")
 
-NEMO_BS_AIR <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/West_Greenland/2011-2019/Driving/physics_BS_2011-2019.csv") %>% 
+NEMO_BS_AIR <- read.csv("C:/Users/psb22188/AppData/Local/R/win-library/4.5/StrathE2EPolar/extdata/Models/Barents_Sea/2011-2019/Driving/physics_BS_2011-2019.csv") %>% 
   subset(select = c(Month,SI_AirTemp)) %>% 
   mutate(Source = "BS NEMO")
 
@@ -60,3 +62,5 @@ ggplot() +
   theme(legend.position = "top") +
   scale_x_continuous(labels = c(1:12),breaks = c(1:12)) +
   NULL
+ggsave("I:/Science/MS/users/students/Hatton_Matthew/Documents/PhD/24-25/West_Greenland_Implementation/Figures/optimisation/NM/Test Runs/AirTempDrivers.png",
+       height = 3000,width = 5000,unit = "px")

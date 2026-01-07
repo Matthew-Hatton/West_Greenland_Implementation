@@ -8,10 +8,11 @@ rm(list=ls())                                                                   
 
 Packages <- c("tidyverse", "data.table", "furrr" ,"sf")                         # List packages
 lapply(Packages, library, character.only = TRUE)                                # Load packages
+source("./regionFile.R")
 
-plan(multisession)
+plan(multisession,workers = availableCores() - 2)
 
-offshore <- readRDS("./Objects/Domains.rds") %>% 
+offshore <- readRDS("./Objects/domain/Domains.rds") %>% 
   filter(Shore == "Offshore")
 
 deep_convection_is <- 0.14                                                      # Threshold above which vertical diffusivity = deep convection
@@ -19,29 +20,6 @@ deep_convection_is <- 0.14                                                      
 data <- list.files("./Objects/vertical boundary/", full.names = T) %>% # Import data
   future_map(readRDS) %>% 
   rbindlist()
-
-#### Quantify the amount of deep convection ####
-
-## For more discussion see the appropriate entry in ./Notes
-
-total_mixing <- group_by(data, Month) %>%                                                                   
-  summarise(Deep_convection_proportion = mean(Vertical_diffusivity > deep_convection_is)) # What proportion of values are deep convection?
-
-ggplot(total_mixing) +
-  geom_line(aes(x = Month, y = Deep_convection_proportion)) +
-  theme_minimal() +
-  ylim(0,1) +
-  labs(y = "Proportion of model domain as deep convection")
-
-#### Mean vertical diffusivity ignoring deep convection ####
-
-normal_mixing <- select(data, Vertical_diffusivity, Year, Month, Forcing, SSP) %>% # Discard excess variables
-  filter(Vertical_diffusivity < deep_convection_is) %>%                            # Remove deep convection
-  group_by(Year, Month, Forcing, SSP) %>%                                          # Create a monthly time series
-  summarise(Vertical_diffusivity = mean(Vertical_diffusivity, na.rm = T)) %>% 
-  ungroup()
-
-saveRDS(normal_mixing, "./Objects/vertical diffusivity.rds")
 
 #### Vertical velocities ####
 
@@ -61,7 +39,7 @@ area <- st_union(samples) %>%                                               # Co
   st_make_valid() %>% 
   st_intersection(offshore) %>% 
   mutate(area_m2 = as.numeric(st_area(.))) %>% 
-  select(x, y, area_m2)
+  dplyr::select(x, y, area_m2)
 
 rm(samples)
 
@@ -75,8 +53,9 @@ area <- st_drop_geometry(area)
 gc()
 gc()
 
-exchanges <- select(data, Vertical_velocity, Year, Month, x, y, Forcing, SSP) %>%   # Discard excess variables
+exchanges <- dplyr::select(data, Vertical_velocity, Year, Month, x, y, Forcing, SSP) %>%   # Discard excess variables
   mutate(Direction = ifelse(Vertical_velocity > 0, "Upwelling", "Downwelling")) %>% # Identify upwelling and downwelling
+  filter(between(Year,start_year,end_year)) %>% 
   left_join(area) %>% 
   mutate(Vertical_velocity = abs(Vertical_velocity)*area_m2) %>%                    # Scale up flow rate to volume of water
   group_by(Year, Month, Direction, Forcing, SSP, x, y) %>%                          # Average across days in a month per pixel
@@ -87,4 +66,4 @@ exchanges <- select(data, Vertical_velocity, Year, Month, x, y, Forcing, SSP) %>
   ungroup() %>% 
   pivot_wider(c(Year, Month, Forcing, SSP), names_from = Direction, values_from = Vertical_velocity)
 
-saveRDS(exchanges, "./Objects/SO_DO exchanges.rds")
+saveRDS(exchanges, "./Objects/chemistry/SO_DO exchanges.rds")

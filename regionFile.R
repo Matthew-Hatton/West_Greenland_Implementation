@@ -6,10 +6,10 @@ library(ggplot2)
 library(sp)
 
 implementation <- "West_Greenland"
-ssp <- "ssp126"
-Force <- "CNRM"
-start_year <- 2040
-end_year <- 2049
+ssp <- 370
+forcing <- "CNRM"
+start_year <- 2011
+end_year <- 2019
 
 crs <- 3035                                                              # Specify the map projection for the project
 
@@ -23,9 +23,9 @@ s_depth <- 40
 d_depth <- 600
 d_from_shore <- 20
 
-lims <- c(xmin = 500000, xmax = 614893, ymin = 6540052, ymax = 8044704)# Specify limits of plotting window, also used to clip data grids
+lims <- c(xmin = 1100000, xmax = 2848930, ymin = 5000000, ymax = 7044704)# Specify limits of plotting window, also used to clip data grids
 
-#zoom <- coord_sf(xlim = c(lims[["xmin"]], lims[["xmax"]]), ylim = c(lims[["ymin"]], lims[["ymax"]])) # Specify the plotting window for SF maps in this region
+zoom <- coord_sf(xlim = c(lims[["xmin"]], lims[["xmax"]]), ylim = c(lims[["ymin"]], lims[["ymax"]])) # Specify the plotting window for SF maps in this region
 
 ggsave_map <- function(filename, plot) {
   ggsave(filename, plot, scale = 1, width = 12, height = 10, units = "cm", dpi = 500)
@@ -49,14 +49,30 @@ shape <- function(matrix) {
   
 }                      # Convert a matrix of lat-lons to an sf polygon
 
+# Region_mask <- matrix(c(-45, 59,
+#                         -61, 59,
+#                         -61,66,
+#                         -60,66,
+#                         -60,68,
+#                         -61,68,
+#                         -61, 72.5,
+#                         -45, 72.5,
+#                         -45, 59),
+#                       ncol = 2, byrow = T) %>% 
+#   list() %>% 
+#   st_polygon() %>% 
+#   st_sfc() %>% 
+#   st_sf(Region = "Southwest Greenland",.)
+# st_crs(Region_mask) <- st_crs(4326)                                        
+# Region_mask <- st_transform(Region_mask, crs = crs)
+# ggplot() + geom_sf(data = Region_mask)
 Region_mask <- matrix(c(-45, 59,
-                        -61, 59,
-                        -61,66,
-                        -60,66,
+                        -57,59,
+                        -57,66.5,
                         -60,68,
                         -61,68,
-                        -61, 72.5,
-                        -45, 72.5,
+                        -61, 72.75,
+                        -45, 72.75,
                         -45, 59),
                       ncol = 2, byrow = T) %>% 
   list() %>% 
@@ -66,6 +82,8 @@ Region_mask <- matrix(c(-45, 59,
 st_crs(Region_mask) <- st_crs(4326)                                        
 Region_mask <- st_transform(Region_mask, crs = crs)
 ggplot() + geom_sf(data = Region_mask)
+
+
 #### bounds.2 MAKE TRANSECTS ####
 
 ## Polygons to mark which transects are along the open ocean-inshore boundary
