@@ -2,7 +2,7 @@ rm(list = ls())                                                                 
 
 library(tidyverse)
 
-water_quality <- read.csv("./Shared Data/Rivers/ArcticGRO Water Quality Data.csv")[-c(1:7),]   # get water quality data and clean
+water_quality <- read.csv("I:/Science/MS/users/students/Hatton_Matthew/Documents/PhD/24-25/Recovery Time Manuscript/Objects/Shared Data/Rivers/ArcticGRO Water Quality Data.csv")[-c(1:7),]   # get water quality data and clean
 names(water_quality) <- water_quality[1,]
 water_quality_ready <- water_quality[-c(1,2),]
 names(water_quality_ready) <- make.unique(names(water_quality_ready))

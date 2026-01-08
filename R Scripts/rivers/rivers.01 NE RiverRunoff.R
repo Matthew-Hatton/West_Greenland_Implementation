@@ -66,7 +66,7 @@ example <- rast(all_files[1,1], subds = "rorunoff", lyrs = 1) %>%               
 #   geom_sf(data = buffer, fill = "red", colour = "red") +
 #   geom_sf(data = example, aes(colour = rorunoff_1), size = 0.2) +
 #   # theme_minimal() +
-#   labs(caption = "Check domain overlaps point estimates of river runoff") 
+#   labs(caption = "Check domain overlaps point estimates of river runoff")
 # 
 # ggsave_map("./Figures/riverOverlap.png", plot = last_plot())
 
@@ -138,4 +138,4 @@ rivers <- future_pmap(all_files, function(file, year, forcing, ssp){
   mutate(Date = as.Date(as.numeric(Day)-1, origin = str_glue("{Year}-01-01")))  # Add a date column
 toc() # 45 minutes
 
-saveRDS(rivers, "./Objects/chemistry/NE River input.rds") # returning 0 for NH4 and NO3?
+saveRDS(rivers, "./Objects/chemistry/NE River runoff.rds")

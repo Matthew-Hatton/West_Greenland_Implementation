@@ -4,7 +4,7 @@ set.seed(710)
 library(tidyverse)
 library(raster)
 
-source("./R Scripts/regionFileWG.R")
+source("./regionFile.R")
 
 water_quality <- read.csv("I:/Science/MS/users/students/Hatton_Matthew/Documents/PhD/24-25/Recovery Time Manuscript/Objects/Shared Data/Rivers/ArcticGRO Water Quality Data.csv")[-c(1:7),]   # get water quality data and clean
 
@@ -93,13 +93,16 @@ monthly_predict <- all_discharge_cropped %>%
     month = as.numeric(month),
     Discharge_scaled = discharge,
     NO3 = predict(model.NO3, newdata = data.frame(Discharge_scaled = discharge))/10,
-    NH4 = predict(model.NH4, newdata = data.frame(Discharge_scaled = discharge))
+    NH4 = predict(model.NH4, newdata = data.frame(Discharge_scaled = discharge))/10
   ) %>% 
   arrange(month)
 
+saveRDS(monthly_predict,"./Objects/chemistry/NE River input.RDS")
 
 ggplot() +
   geom_line(data = monthly_predict,aes(x = month,y = NO3))
+ggplot() +
+  geom_line(data = monthly_predict,aes(x = month,y = NH4))
 
 
 ### not working. For now just use the NE values...
