@@ -1,19 +1,19 @@
-#script to extract ice variables from NEMO-ERSEM
+#script to extract ice variables and Air Temperature from NEMO-ERSEM
 rm(list = ls())
 
 packages <- c("tidyverse", "nemoRsem", "furrr", "ncdf4","tictoc")                                 # List packages
 lapply(packages, library, character.only = TRUE)                            # Load packages
-source("./R Scripts/regionFileWG.R") 
-source("./R Scripts/ne/Functions/Ice Extraction.R")
+source("./regionFile.R") 
+source("./R Scripts/NE.extraction/Functions/Ice Extraction.R")
 sf_use_s2(F)
 
 plan(multisession,workers = availableCores() - 2)
 
 
-domains <- readRDS("./Objects/domain/domainWG.rds") %>%                             # Load SF polygons of the MiMeMo model domains
-  select(-c(Elevation, area))                                               # Drop unneeded data which would get included in new NM files
+domains <- readRDS("./Objects/domain/Domains.rds") %>%                             # Load SF polygons of the MiMeMo model domains
+  dplyr::select(-c(Elevation, area))                                               # Drop unneeded data which would get included in new NM files
 
-crop <- readRDS("./Objects/domain/domainWG.rds") %>%  # Load SF polygons of the MiMeMo model domains
+crop <- readRDS("./Objects/domain/Domains.rds") %>%  # Load SF polygons of the MiMeMo model domains
   st_transform(crs = 3035) %>% #convert to 3035 for buffer
   st_buffer(dist = 50000) %>%                                               # It needs to be a bit bigger for sampling flows at the domain boundary
   st_transform(crs = 4326) %>% #convert back incase it needs to be in 4326 for some
@@ -55,7 +55,7 @@ ice_scheme <- scheme_reframe_ice(scheme) %>%
 scheme_result <- arrange(scheme, group) # Create results to bind ice values to later
 
 all_files <- categorise_files("I:/Science/MS-Marine/MA/",
-                                     recursive = TRUE,ice = T)
+                              recursive = TRUE,ice = T)
 tic()
 split_files <- all_files %>%
   split(.,f = seq(nrow(.)))
@@ -72,6 +72,11 @@ split_files %>%
     month <- .x$Month
     # Call your get_icemod function
     get_icemod(path, file, scheme_result, start = start, count = count, ice_scheme = ice_scheme,
-               year = year, month = month, forcing = forcing,SSP = SSP)
+               year = year, month = month, forcing = forcing,SSP = SSP,out.dir = "./Objects/NEMO RAW/NE_Ice")
   },.progress = T)
 toc()
+## Test
+# NE <- readRDS("./Objects/NEMO RAW/NE_Ice/NE.ICE.CNRM.hist.1976.12.rds")
+# 
+# ggplot() +
+#   geom_raster(data = NE,aes(x = x,y = y,fill = Air_Temperature))
